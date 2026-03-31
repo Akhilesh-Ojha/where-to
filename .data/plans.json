@@ -1,0 +1,1503 @@
+{
+  "plans": [
+    {
+      "id": "we-3-ejvf",
+      "groupName": "We 3",
+      "category": "pub",
+      "createdBy": "Harshita",
+      "createdAt": "2026-03-31T08:50:28.553Z",
+      "hostLocation": {
+        "mode": "gps",
+        "label": "Current location",
+        "address": "Captured from device GPS",
+        "lat": 12.893396487624393,
+        "lng": 77.7099034806493
+      },
+      "participants": [
+        {
+          "id": "harshita-jlzd",
+          "name": "Harshita",
+          "joinedAt": "2026-03-31T08:50:28.553Z",
+          "location": {
+            "mode": "gps",
+            "label": "Current location",
+            "address": "Captured from device GPS",
+            "lat": 12.893396487624393,
+            "lng": 77.7099034806493
+          }
+        },
+        {
+          "id": "yachi-f8g6",
+          "name": "Yachi",
+          "joinedAt": "2026-03-31T08:50:52.720Z",
+          "location": {
+            "mode": "manual",
+            "label": "Banaswadi",
+            "address": "Bengaluru, Karnataka",
+            "lat": 13.0141618,
+            "lng": 77.6518539,
+            "placeId": "322818386874"
+          }
+        },
+        {
+          "id": "payal-e8bq",
+          "name": "Payal",
+          "joinedAt": "2026-03-31T08:51:06.609Z",
+          "location": {
+            "mode": "manual",
+            "label": "Kormangala East",
+            "address": "Bengaluru, Karnataka",
+            "lat": 12.9310939,
+            "lng": 77.63047909,
+            "placeId": "320142097211"
+          }
+        }
+      ],
+      "destinations": [
+        {
+          "placeId": "321648798081",
+          "name": "Shri Sarathi Restaurant and Bar",
+          "address": "Shri Sarathi Restaurant and Bar, HAL Old Airport Road, Vimanapura, Jagadish Nagar, Bengaluru, Bangalore East, Karnataka, 560075, India",
+          "type": "pub",
+          "lat": 12.9591054,
+          "lng": 77.6612287,
+          "fairness": 64,
+          "averageDistanceKm": 6.592951094781921,
+          "distances": [
+            {
+              "participantId": "harshita-jlzd",
+              "participantName": "Harshita",
+              "distanceKm": 9.011824479722126
+            },
+            {
+              "participantId": "yachi-f8g6",
+              "participantName": "Yachi",
+              "distanceKm": 6.205688832225818
+            },
+            {
+              "participantId": "payal-e8bq",
+              "participantName": "Payal",
+              "distanceKm": 4.561339972397823
+            }
+          ]
+        },
+        {
+          "placeId": "321844851905",
+          "name": "Mandarin Hoysala Delux",
+          "address": "Mandarin Hoysala Delux, SNS Arcade Road, Vinayaka Nagar A Block, Konena Agrahara, Bengaluru, Bangalore East, Karnataka, 560017, India",
+          "type": "bar",
+          "lat": 12.9588944,
+          "lng": 77.6598889,
+          "fairness": 63,
+          "averageDistanceKm": 6.575191355256977,
+          "distances": [
+            {
+              "participantId": "harshita-jlzd",
+              "participantName": "Harshita",
+              "distanceKm": 9.078752873231672
+            },
+            {
+              "participantId": "yachi-f8g6",
+              "participantName": "Yachi",
+              "distanceKm": 6.2068151310588435
+            },
+            {
+              "participantId": "payal-e8bq",
+              "participantName": "Payal",
+              "distanceKm": 4.440006061480418
+            }
+          ]
+        },
+        {
+          "placeId": "323549538956",
+          "name": "Otto's",
+          "address": "Otto's, Wind Tunnel Road, Thimmah Reddy Colony, Konena Agrahara, Bengaluru, Bangalore East, Karnataka, 560017, India",
+          "type": "pub",
+          "lat": 12.9587633,
+          "lng": 77.6543892,
+          "fairness": 57,
+          "averageDistanceKm": 6.541358878132921,
+          "distances": [
+            {
+              "participantId": "harshita-jlzd",
+              "participantName": "Harshita",
+              "distanceKm": 9.435492958214175
+            },
+            {
+              "participantId": "yachi-f8g6",
+              "participantName": "Yachi",
+              "distanceKm": 6.166154168890101
+            },
+            {
+              "participantId": "payal-e8bq",
+              "participantName": "Payal",
+              "distanceKm": 4.022429507294486
+            }
+          ]
+        },
+        {
+          "placeId": "322063296162",
+          "name": "Brewberrys",
+          "address": "Brewberrys, Service Road, Green Glen Layout, Bellanduru, Bengaluru, Bangalore East, Karnataka, 560103, India",
+          "type": "pub",
+          "lat": 12.9254043,
+          "lng": 77.674814,
+          "fairness": 57,
+          "averageDistanceKm": 6.744407328846703,
+          "distances": [
+            {
+              "participantId": "harshita-jlzd",
+              "participantName": "Harshita",
+              "distanceKm": 5.2087629748419895
+            },
+            {
+              "participantId": "yachi-f8g6",
+              "participantName": "Yachi",
+              "distanceKm": 10.178136029079448
+            },
+            {
+              "participantId": "payal-e8bq",
+              "participantName": "Payal",
+              "distanceKm": 4.846322982618671
+            }
+          ]
+        },
+        {
+          "placeId": "322783110690",
+          "name": "Gawky goose",
+          "address": "Gawky goose, Wind Tunnel Road, Vibhootipura, Bengaluru, Bangalore East, Karnataka, 560017, India",
+          "type": "bar",
+          "lat": 12.9540621,
+          "lng": 77.6527819,
+          "fairness": 55,
+          "averageDistanceKm": 6.451897348097039,
+          "distances": [
+            {
+              "participantId": "harshita-jlzd",
+              "participantName": "Harshita",
+              "distanceKm": 9.155859951053413
+            },
+            {
+              "participantId": "yachi-f8g6",
+              "participantName": "Yachi",
+              "distanceKm": 6.683538143167806
+            },
+            {
+              "participantId": "payal-e8bq",
+              "participantName": "Payal",
+              "distanceKm": 3.5162939500698958
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plan-with-babes-yxqf",
+      "groupName": "Plan with babes",
+      "category": "gym",
+      "createdBy": "Akhilesh",
+      "createdAt": "2026-03-31T08:46:40.833Z",
+      "hostLocation": {
+        "mode": "gps",
+        "label": "Current location",
+        "address": "Captured from device GPS",
+        "lat": 12.893424142823934,
+        "lng": 77.70989676206229
+      },
+      "participants": [
+        {
+          "id": "akhilesh-souy",
+          "name": "Akhilesh",
+          "joinedAt": "2026-03-31T08:46:40.833Z",
+          "location": {
+            "mode": "gps",
+            "label": "Current location",
+            "address": "Captured from device GPS",
+            "lat": 12.893424142823934,
+            "lng": 77.70989676206229
+          }
+        },
+        {
+          "id": "harshita-gshu",
+          "name": "Harshita",
+          "joinedAt": "2026-03-31T08:47:11.776Z",
+          "location": {
+            "mode": "manual",
+            "label": "Kormangala East",
+            "address": "Bengaluru, Karnataka",
+            "lat": 12.9310939,
+            "lng": 77.63047909,
+            "placeId": "320142097211"
+          }
+        }
+      ],
+      "destinations": [
+        {
+          "placeId": "320796004144",
+          "name": "Gold Star fitness",
+          "address": "Gold Star fitness, 74/3, Outer Ring Road, Shivanasamudra Ward, Belandur, Bangalore, Bangalore East, Karnataka, 560103, India",
+          "type": "fitness_centre",
+          "lat": 12.9256138,
+          "lng": 77.6763208,
+          "fairness": 99,
+          "averageDistanceKm": 5.0548804996390135,
+          "distances": [
+            {
+              "participantId": "akhilesh-souy",
+              "participantName": "Akhilesh",
+              "distanceKm": 5.104380187187177
+            },
+            {
+              "participantId": "harshita-gshu",
+              "participantName": "Harshita",
+              "distanceKm": 5.00538081209085
+            }
+          ]
+        },
+        {
+          "placeId": "320206153902",
+          "name": "Iconic Fitness",
+          "address": "Iconic Fitness, Service Road, Green Glen Layout, Bellanduru, Bengaluru, Bangalore East, Karnataka, 560103, India",
+          "type": "fitness_centre",
+          "lat": 12.9259316,
+          "lng": 77.675759,
+          "fairness": 98,
+          "averageDistanceKm": 5.05665959242587,
+          "distances": [
+            {
+              "participantId": "akhilesh-souy",
+              "participantName": "Akhilesh",
+              "distanceKm": 5.172598958822616
+            },
+            {
+              "participantId": "harshita-gshu",
+              "participantName": "Harshita",
+              "distanceKm": 4.940720226029123
+            }
+          ]
+        },
+        {
+          "placeId": "321179934971",
+          "name": "cult.fit",
+          "address": "cult.fit, Service Road, Green Glen Layout, Bellanduru, Bengaluru, Bangalore South, Karnataka, 560103, India",
+          "type": "fitness_centre",
+          "lat": 12.9231513,
+          "lng": 77.6697399,
+          "fairness": 91,
+          "averageDistanceKm": 4.90548644996956,
+          "distances": [
+            {
+              "participantId": "akhilesh-souy",
+              "participantName": "Akhilesh",
+              "distanceKm": 5.465323054046097
+            },
+            {
+              "participantId": "harshita-gshu",
+              "participantName": "Harshita",
+              "distanceKm": 4.345649845893022
+            }
+          ]
+        },
+        {
+          "placeId": "322405428588",
+          "name": "Iskcon - Sarjapur Road",
+          "address": "Iskcon - Sarjapur Road, Bellandur Gate Road & Service Road, Iblur, Iblur, Bengaluru, Bangalore South, Karnataka, 560102, India",
+          "type": "fitness_centre",
+          "lat": 12.9209474,
+          "lng": 77.66728445,
+          "fairness": 89,
+          "averageDistanceKm": 4.842935876246054,
+          "distances": [
+            {
+              "participantId": "akhilesh-souy",
+              "participantName": "Akhilesh",
+              "distanceKm": 5.5405192834215855
+            },
+            {
+              "participantId": "harshita-gshu",
+              "participantName": "Harshita",
+              "distanceKm": 4.145352469070523
+            }
+          ]
+        },
+        {
+          "placeId": "323089063558",
+          "name": "Apple Fitness",
+          "address": "Apple Fitness, Palm Avenue, Green Glen Layout, Bellanduru, Bengaluru, Bangalore South, Karnataka, 560103, India",
+          "type": "fitness_centre",
+          "lat": 12.9269827,
+          "lng": 77.6699187,
+          "fairness": 89,
+          "averageDistanceKm": 5.008499105285744,
+          "distances": [
+            {
+              "participantId": "akhilesh-souy",
+              "participantName": "Akhilesh",
+              "distanceKm": 5.7183181036662525
+            },
+            {
+              "participantId": "harshita-gshu",
+              "participantName": "Harshita",
+              "distanceKm": 4.298680106905236
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plan-with-babes-4lfj",
+      "groupName": "Plan with babes",
+      "category": "gym",
+      "createdBy": "Akhilesh",
+      "createdAt": "2026-03-31T08:42:59.897Z",
+      "hostLocation": {
+        "mode": "gps",
+        "label": "Current location",
+        "address": "Captured from device GPS",
+        "lat": 12.893360081806298,
+        "lng": 77.70995414842295
+      },
+      "participants": [
+        {
+          "id": "akhilesh-oj1c",
+          "name": "Akhilesh",
+          "joinedAt": "2026-03-31T08:42:59.897Z",
+          "location": {
+            "mode": "gps",
+            "label": "Current location",
+            "address": "Captured from device GPS",
+            "lat": 12.893360081806298,
+            "lng": 77.70995414842295
+          }
+        },
+        {
+          "id": "harshita-0xtf",
+          "name": "harshita",
+          "joinedAt": "2026-03-31T08:43:38.507Z",
+          "location": {
+            "mode": "manual",
+            "label": "Sarjapura",
+            "address": "Sarjapura, Karnataka",
+            "lat": 12.8600866,
+            "lng": 77.7861352,
+            "placeId": "321387345922"
+          }
+        }
+      ],
+      "destinations": []
+    },
+    {
+      "id": "plan-with-babes-z8ai",
+      "groupName": "Plan with babes",
+      "category": "pub",
+      "createdBy": "Akhilesh",
+      "createdAt": "2026-03-31T08:36:14.464Z",
+      "hostLocation": {
+        "mode": "gps",
+        "label": "Current location",
+        "address": "Captured from device GPS",
+        "lat": 12.893381255646132,
+        "lng": 77.70990523423552
+      },
+      "participants": [
+        {
+          "id": "akhilesh-jesw",
+          "name": "Akhilesh",
+          "joinedAt": "2026-03-31T08:36:14.464Z",
+          "location": {
+            "mode": "gps",
+            "label": "Current location",
+            "address": "Captured from device GPS",
+            "lat": 12.893381255646132,
+            "lng": 77.70990523423552
+          }
+        }
+      ],
+      "destinations": []
+    },
+    {
+      "id": "unlegals-mxd2",
+      "groupName": "Unlegals",
+      "category": "pub",
+      "createdBy": "Akhilesh",
+      "createdAt": "2026-03-31T08:32:16.922Z",
+      "hostLocation": {
+        "mode": "gps",
+        "label": "Current location",
+        "address": "Captured from device GPS",
+        "lat": 12.89339091063802,
+        "lng": 77.7099041915204
+      },
+      "participants": [
+        {
+          "id": "akhilesh-3x9q",
+          "name": "Akhilesh",
+          "joinedAt": "2026-03-31T08:32:16.922Z",
+          "location": {
+            "mode": "gps",
+            "label": "Current location",
+            "address": "Captured from device GPS",
+            "lat": 12.89339091063802,
+            "lng": 77.7099041915204
+          }
+        },
+        {
+          "id": "ayush-lg7t",
+          "name": "Ayush",
+          "joinedAt": "2026-03-31T08:32:48.250Z",
+          "location": {
+            "mode": "manual",
+            "label": "Bellandur Lake",
+            "address": "Bellandur Lake, India",
+            "lat": 12.93714445,
+            "lng": 77.67202269,
+            "placeId": "321224393008"
+          }
+        },
+        {
+          "id": "ashish-00sa",
+          "name": "Ashish",
+          "joinedAt": "2026-03-31T08:33:12.257Z",
+          "location": {
+            "mode": "manual",
+            "label": "Kormangala East",
+            "address": "Bengaluru, Karnataka",
+            "lat": 12.9310939,
+            "lng": 77.63047909,
+            "placeId": "320142097211"
+          }
+        }
+      ],
+      "destinations": [
+        {
+          "placeId": "321941252985",
+          "name": "Tap Out Pub",
+          "address": "Tap Out Pub, Haralur Road, Ambalipura, Kasavanahalli, Bengaluru, Bangalore South, Karnataka, 560103, India",
+          "type": "pub",
+          "lat": 12.9137236,
+          "lng": 77.6664546,
+          "fairness": 80,
+          "averageDistanceKm": 4.082805811660368,
+          "distances": [
+            {
+              "participantId": "akhilesh-3x9q",
+              "participantName": "Akhilesh",
+              "distanceKm": 5.223962935113849
+            },
+            {
+              "participantId": "ayush-lg7t",
+              "participantName": "Ayush",
+              "distanceKm": 2.673280995504874
+            },
+            {
+              "participantId": "ashish-00sa",
+              "participantName": "Ashish",
+              "distanceKm": 4.35117350436238
+            }
+          ]
+        },
+        {
+          "placeId": "323431625796",
+          "name": "Xtreme Sports Bar",
+          "address": "Xtreme Sports Bar, Central Jail Road, Kaikondrahalli, Kasavanahalli, Bengaluru, Bangalore South, Karnataka, 560035, India",
+          "type": "pub",
+          "lat": 12.911144,
+          "lng": 77.6761815,
+          "fairness": 80,
+          "averageDistanceKm": 4.169142661979965,
+          "distances": [
+            {
+              "participantId": "akhilesh-3x9q",
+              "participantName": "Akhilesh",
+              "distanceKm": 4.1541281154470235
+            },
+            {
+              "participantId": "ayush-lg7t",
+              "participantName": "Ayush",
+              "distanceKm": 2.926040982570365
+            },
+            {
+              "participantId": "ashish-00sa",
+              "participantName": "Ashish",
+              "distanceKm": 5.427258887922505
+            }
+          ]
+        },
+        {
+          "placeId": "323055929778",
+          "name": "Vapour",
+          "address": "Vapour, Sarjapura Road, Shivanasamudra Ward, Bengaluru, Bangalore East, Karnataka, 560103, India",
+          "type": "bar",
+          "lat": 12.914469,
+          "lng": 77.6775091,
+          "fairness": 77,
+          "averageDistanceKm": 4.078022509175824,
+          "distances": [
+            {
+              "participantId": "akhilesh-3x9q",
+              "participantName": "Akhilesh",
+              "distanceKm": 4.221589199420381
+            },
+            {
+              "participantId": "ayush-lg7t",
+              "participantName": "Ayush",
+              "distanceKm": 2.5905568288486727
+            },
+            {
+              "participantId": "ashish-00sa",
+              "participantName": "Ashish",
+              "distanceKm": 5.421921499258417
+            }
+          ]
+        },
+        {
+          "placeId": "322869618114",
+          "name": "The Hoot Cafe & Brewery",
+          "address": "The Hoot Cafe & Brewery, Sarjapur Road, Ambalipura, Kasavanahalli, Bangalore, Bangalore South, Karnataka, 560035, India",
+          "type": "pub",
+          "lat": 12.9141115,
+          "lng": 77.67861283,
+          "fairness": 77,
+          "averageDistanceKm": 4.102320137463486,
+          "distances": [
+            {
+              "participantId": "akhilesh-3x9q",
+              "participantName": "Akhilesh",
+              "distanceKm": 4.100157898428846
+            },
+            {
+              "participantId": "ayush-lg7t",
+              "participantName": "Ayush",
+              "distanceKm": 2.6588697153429885
+            },
+            {
+              "participantId": "ashish-00sa",
+              "participantName": "Ashish",
+              "distanceKm": 5.547932798618622
+            }
+          ]
+        },
+        {
+          "placeId": "322353894817",
+          "name": "Byg Brewsky",
+          "address": "Byg Brewsky, Sarjapura Road, Shivanasamudra Ward, Bengaluru, Bangalore East, Karnataka, 560035, India",
+          "type": "pub",
+          "lat": 12.9129113,
+          "lng": 77.68309598,
+          "fairness": 75,
+          "averageDistanceKm": 4.2090048244770655,
+          "distances": [
+            {
+              "participantId": "akhilesh-3x9q",
+              "participantName": "Akhilesh",
+              "distanceKm": 3.6268797649565756
+            },
+            {
+              "participantId": "ayush-lg7t",
+              "participantName": "Ayush",
+              "distanceKm": 2.9497661194977813
+            },
+            {
+              "participantId": "ashish-00sa",
+              "participantName": "Ashish",
+              "distanceKm": 6.05036858897684
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plan-with-babes-blde",
+      "groupName": "Plan with babes",
+      "category": "cafe",
+      "createdBy": "Akhilesh",
+      "createdAt": "2026-03-31T08:15:42.628Z",
+      "hostLocation": {
+        "mode": "gps",
+        "label": "Current location",
+        "address": "Captured from device GPS",
+        "lat": 12.89337604866589,
+        "lng": 77.70993509511429
+      },
+      "participants": [
+        {
+          "id": "akhilesh-in8y",
+          "name": "Akhilesh",
+          "joinedAt": "2026-03-31T08:15:42.628Z",
+          "location": {
+            "mode": "gps",
+            "label": "Current location",
+            "address": "Captured from device GPS",
+            "lat": 12.89337604866589,
+            "lng": 77.70993509511429
+          }
+        },
+        {
+          "id": "harshita-jjbd",
+          "name": "Harshita",
+          "joinedAt": "2026-03-31T08:16:21.049Z",
+          "location": {
+            "mode": "manual",
+            "label": "Jamming Goat 3.0",
+            "address": "Outer Ring Road, JP Nagar, Bengaluru, Karnataka",
+            "lat": 12.9061131,
+            "lng": 77.5897944,
+            "placeId": "320345003806"
+          }
+        }
+      ],
+      "destinations": [
+        {
+          "placeId": "321056278084",
+          "name": "Garden House Cafe",
+          "address": "Garden House Cafe, 25th Main Road, Parangipalya, Iblur, Bengaluru, Bangalore South, Karnataka, 560102, India",
+          "type": "cafe",
+          "lat": 12.9087228,
+          "lng": 77.6506028,
+          "fairness": 100,
+          "averageDistanceKm": 6.6252968228082825,
+          "distances": [
+            {
+              "participantId": "akhilesh-in8y",
+              "participantName": "Akhilesh",
+              "distanceKm": 6.653472684371732
+            },
+            {
+              "participantId": "harshita-jjbd",
+              "participantName": "Harshita",
+              "distanceKm": 6.597120961244833
+            }
+          ]
+        },
+        {
+          "placeId": "323906607853",
+          "name": "Dunk'd",
+          "address": "Dunk'd, 27th Main Road, hsr layout, somasundarapalya Bengaluru, KARNATAKA 560102 India, Parangipalya, Agara, Bengaluru, Bangalore South, Karnataka, 560102, India",
+          "type": "cafe",
+          "lat": 12.9014685,
+          "lng": 77.6504016,
+          "fairness": 99,
+          "averageDistanceKm": 6.552273000986116,
+          "distances": [
+            {
+              "participantId": "akhilesh-in8y",
+              "participantName": "Akhilesh",
+              "distanceKm": 6.51525152966961
+            },
+            {
+              "participantId": "harshita-jjbd",
+              "participantName": "Harshita",
+              "distanceKm": 6.5892944723026226
+            }
+          ]
+        },
+        {
+          "placeId": "322534411511",
+          "name": "The Humble Pie",
+          "address": "The Humble Pie, 22nd Cross Road, Parangipalya, Iblur, Bengaluru, Bangalore South, Karnataka, 560102, India",
+          "type": "cafe",
+          "lat": 12.9085228,
+          "lng": 77.6504774,
+          "fairness": 99,
+          "averageDistanceKm": 6.6217789476491475,
+          "distances": [
+            {
+              "participantId": "akhilesh-in8y",
+              "participantName": "Akhilesh",
+              "distanceKm": 6.660955380681977
+            },
+            {
+              "participantId": "harshita-jjbd",
+              "participantName": "Harshita",
+              "distanceKm": 6.582602514616318
+            }
+          ]
+        },
+        {
+          "placeId": "322637703808",
+          "name": "The Brussles Waffle",
+          "address": "The Brussles Waffle, 22nd Cross Road, Parangipalya, Iblur, Bengaluru, Bangalore South, Karnataka, 560102, India",
+          "type": "cafe",
+          "lat": 12.9087123,
+          "lng": 77.6505691,
+          "fairness": 99,
+          "averageDistanceKm": 6.625062473858712,
+          "distances": [
+            {
+              "participantId": "akhilesh-in8y",
+              "participantName": "Akhilesh",
+              "distanceKm": 6.656704176864948
+            },
+            {
+              "participantId": "harshita-jjbd",
+              "participantName": "Harshita",
+              "distanceKm": 6.593420770852476
+            }
+          ]
+        },
+        {
+          "placeId": "320804675673",
+          "name": "Coffee & More",
+          "address": "Coffee & More, 22nd Cross Road, Parangipalya, Iblur, Bengaluru, Bangalore South, Karnataka, 560102, India",
+          "type": "cafe",
+          "lat": 12.9085772,
+          "lng": 77.6499484,
+          "fairness": 98,
+          "averageDistanceKm": 6.621764483375984,
+          "distances": [
+            {
+              "participantId": "akhilesh-in8y",
+              "participantName": "Akhilesh",
+              "distanceKm": 6.717963874768246
+            },
+            {
+              "participantId": "harshita-jjbd",
+              "participantName": "Harshita",
+              "distanceKm": 6.525565091983722
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plan-with-babes-kh9t",
+      "groupName": "Plan with babes",
+      "category": "pub",
+      "createdBy": "Akhilesh",
+      "createdAt": "2026-03-31T08:11:07.941Z",
+      "hostLocation": {
+        "mode": "gps",
+        "label": "Current location",
+        "address": "Captured from device GPS",
+        "lat": 12.893311598993073,
+        "lng": 77.70998129539802
+      },
+      "participants": [
+        {
+          "id": "akhilesh-1b4r",
+          "name": "Akhilesh",
+          "joinedAt": "2026-03-31T08:11:07.941Z",
+          "location": {
+            "mode": "gps",
+            "label": "Current location",
+            "address": "Captured from device GPS",
+            "lat": 12.893311598993073,
+            "lng": 77.70998129539802
+          }
+        },
+        {
+          "id": "harshita-stac",
+          "name": "Harshita",
+          "joinedAt": "2026-03-31T08:12:11.021Z",
+          "location": {
+            "mode": "manual",
+            "label": "Mahadevpura Police Station",
+            "address": "Whitefield Road, Devasandra, Bengaluru, Karnataka",
+            "lat": 12.99684115,
+            "lng": 77.6928386,
+            "placeId": "321486747197"
+          }
+        },
+        {
+          "id": "harshita-pfai",
+          "name": "Harshita",
+          "joinedAt": "2026-03-31T08:12:14.817Z",
+          "location": {
+            "mode": "manual",
+            "label": "Mahadevpura Police Station",
+            "address": "Whitefield Road, Devasandra, Bengaluru, Karnataka",
+            "lat": 12.99684115,
+            "lng": 77.6928386,
+            "placeId": "321486747197"
+          }
+        }
+      ],
+      "destinations": [
+        {
+          "placeId": "324247683720",
+          "name": "Iron Hill Bengaluru",
+          "address": "Iron Hill Bengaluru, Tulsi Theatre Road, Panathur, Bengaluru, Bangalore East, Karnataka, 560037, India",
+          "type": "pub",
+          "lat": 12.95088545,
+          "lng": 77.69867157,
+          "fairness": 89,
+          "averageDistanceKm": 5.605388341304192,
+          "distances": [
+            {
+              "participantId": "akhilesh-1b4r",
+              "participantName": "Akhilesh",
+              "distanceKm": 6.518206006917466
+            },
+            {
+              "participantId": "harshita-stac",
+              "participantName": "Harshita",
+              "distanceKm": 5.148979508497555
+            },
+            {
+              "participantId": "harshita-pfai",
+              "participantName": "Harshita",
+              "distanceKm": 5.148979508497555
+            }
+          ]
+        },
+        {
+          "placeId": "320096551723",
+          "name": "One Floor Down",
+          "address": "One Floor Down, Service Road, MSR Layout, Munnenkolalu, Bengaluru, Bangalore East, Karnataka, 560037, India",
+          "type": "bar",
+          "lat": 12.9509627,
+          "lng": 77.7001091,
+          "fairness": 89,
+          "averageDistanceKm": 5.6076762510244835,
+          "distances": [
+            {
+              "participantId": "akhilesh-1b4r",
+              "participantName": "Akhilesh",
+              "distanceKm": 6.499184895932635
+            },
+            {
+              "participantId": "harshita-stac",
+              "participantName": "Harshita",
+              "distanceKm": 5.1619219285704085
+            },
+            {
+              "participantId": "harshita-pfai",
+              "participantName": "Harshita",
+              "distanceKm": 5.1619219285704085
+            }
+          ]
+        },
+        {
+          "placeId": "321465828326",
+          "name": "House of Spirit",
+          "address": "House of Spirit, Service Road, Panathur, Bengaluru, Bangalore East, Karnataka, 560037, India",
+          "type": "pub",
+          "lat": 12.951694,
+          "lng": 77.6994711,
+          "fairness": 88,
+          "averageDistanceKm": 5.5778777296088355,
+          "distances": [
+            {
+              "participantId": "akhilesh-1b4r",
+              "participantName": "Akhilesh",
+              "distanceKm": 6.59100313063529
+            },
+            {
+              "participantId": "harshita-stac",
+              "participantName": "Harshita",
+              "distanceKm": 5.071315029095609
+            },
+            {
+              "participantId": "harshita-pfai",
+              "participantName": "Harshita",
+              "distanceKm": 5.071315029095609
+            }
+          ]
+        },
+        {
+          "placeId": "320932095808",
+          "name": "Bhagini Palace",
+          "address": "Bhagini Palace, Service Road, MSR Layout, Munnenkolalu, Bengaluru, Bangalore East, Karnataka, 560037, India",
+          "type": "pub",
+          "lat": 12.9517442,
+          "lng": 77.700091,
+          "fairness": 88,
+          "averageDistanceKm": 5.5789136009757785,
+          "distances": [
+            {
+              "participantId": "akhilesh-1b4r",
+              "participantName": "Akhilesh",
+              "distanceKm": 6.585232369962292
+            },
+            {
+              "participantId": "harshita-stac",
+              "participantName": "Harshita",
+              "distanceKm": 5.075754216482522
+            },
+            {
+              "participantId": "harshita-pfai",
+              "participantName": "Harshita",
+              "distanceKm": 5.075754216482522
+            }
+          ]
+        },
+        {
+          "placeId": "324038576265",
+          "name": "Long Boat Brewing Co.",
+          "address": "Long Boat Brewing Co., 108/2, 1st Main Road, MSR Layout, Marathahalli, Bangalore, Bangalore East, Karnataka, 560037, India",
+          "type": "pub",
+          "lat": 12.9518075,
+          "lng": 77.70054667,
+          "fairness": 88,
+          "averageDistanceKm": 5.5792356208224385,
+          "distances": [
+            {
+              "participantId": "akhilesh-1b4r",
+              "participantName": "Akhilesh",
+              "distanceKm": 6.584327464423469
+            },
+            {
+              "participantId": "harshita-stac",
+              "participantName": "Harshita",
+              "distanceKm": 5.076689699021924
+            },
+            {
+              "participantId": "harshita-pfai",
+              "participantName": "Harshita",
+              "distanceKm": 5.076689699021924
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plan-with-babes-2gp2",
+      "groupName": "Plan with babes",
+      "category": "pub",
+      "createdBy": "Akhil",
+      "createdAt": "2026-03-31T07:55:46.210Z",
+      "hostLocation": {
+        "mode": "gps",
+        "label": "Current location",
+        "address": "Captured from device GPS",
+        "lat": 12.893412076634215,
+        "lng": 77.7098799371313
+      },
+      "participants": [
+        {
+          "id": "akhil-cdy2",
+          "name": "Akhil",
+          "joinedAt": "2026-03-31T07:55:46.210Z",
+          "location": {
+            "mode": "gps",
+            "label": "Current location",
+            "address": "Captured from device GPS",
+            "lat": 12.893412076634215,
+            "lng": 77.7098799371313
+          }
+        },
+        {
+          "id": "harshita-vyr2",
+          "name": "Harshita",
+          "joinedAt": "2026-03-31T07:56:30.796Z",
+          "location": {
+            "mode": "manual",
+            "label": "Mahadevpura Police Station",
+            "address": "Whitefield Road, Devasandra, Bengaluru, Karnataka",
+            "lat": 12.99684115,
+            "lng": 77.6928386,
+            "placeId": "321486747197"
+          }
+        }
+      ],
+      "destinations": [
+        {
+          "placeId": "322113235753",
+          "name": "BLR Brewing Co.",
+          "address": "BLR Brewing Co., Outer Ring Road, Kaadubeesanahalli, Panathur, Bengaluru, Bangalore East, Karnataka, 560103, India",
+          "type": "pub",
+          "lat": 12.9443543,
+          "lng": 77.6945749,
+          "fairness": 99,
+          "averageDistanceKm": 5.870848403591991,
+          "distances": [
+            {
+              "participantId": "akhil-cdy2",
+              "participantName": "Akhil",
+              "distanceKm": 5.902393632511907
+            },
+            {
+              "participantId": "harshita-vyr2",
+              "participantName": "Harshita",
+              "distanceKm": 5.839303174672074
+            }
+          ]
+        },
+        {
+          "placeId": "321201799476",
+          "name": "Tropika Brewing Co",
+          "address": "Tropika Brewing Co, Service Road, Kaadubeesanahalli, Panathur, Bengaluru, Bangalore East, Karnataka, 560103, India",
+          "type": "pub",
+          "lat": 12.9421287,
+          "lng": 77.6977454,
+          "fairness": 96,
+          "averageDistanceKm": 5.840669268947366,
+          "distances": [
+            {
+              "participantId": "akhil-cdy2",
+              "participantName": "Akhil",
+              "distanceKm": 5.57440208167664
+            },
+            {
+              "participantId": "harshita-vyr2",
+              "participantName": "Harshita",
+              "distanceKm": 6.106936456218092
+            }
+          ]
+        },
+        {
+          "placeId": "321951464596",
+          "name": "Hashtag 88 Taproom",
+          "address": "Hashtag 88 Taproom, Outer Ring Road, Marathahalli, Bangalore, Bangalore East, Karnataka, 560037, India",
+          "type": "pub",
+          "lat": 12.9482492,
+          "lng": 77.6984721,
+          "fairness": 94,
+          "averageDistanceKm": 5.829622202574541,
+          "distances": [
+            {
+              "participantId": "akhil-cdy2",
+              "participantName": "Akhil",
+              "distanceKm": 6.221693530335765
+            },
+            {
+              "participantId": "harshita-vyr2",
+              "participantName": "Harshita",
+              "distanceKm": 5.437550874813316
+            }
+          ]
+        },
+        {
+          "placeId": "321001884541",
+          "name": "Chin Lung",
+          "address": "Chin Lung, Service Road, Kaadubeesanahalli, Panathur, Bengaluru, Bangalore East, Karnataka, 560103, India",
+          "type": "pub",
+          "lat": 12.9412292,
+          "lng": 77.6966422,
+          "fairness": 94,
+          "averageDistanceKm": 5.852338068057879,
+          "distances": [
+            {
+              "participantId": "akhil-cdy2",
+              "participantName": "Akhil",
+              "distanceKm": 5.507189531060453
+            },
+            {
+              "participantId": "harshita-vyr2",
+              "participantName": "Harshita",
+              "distanceKm": 6.197486605055305
+            }
+          ]
+        },
+        {
+          "placeId": "324064956998",
+          "name": "Nakkshatra",
+          "address": "Nakkshatra, 88, Outer Ring Road, Panathur, Bengaluru, Bangalore East, Karnataka, 560037, India",
+          "type": "bar",
+          "lat": 12.9484948,
+          "lng": 77.6987857,
+          "fairness": 93,
+          "averageDistanceKm": 5.828089197270076,
+          "distances": [
+            {
+              "participantId": "akhil-cdy2",
+              "participantName": "Akhil",
+              "distanceKm": 6.241824383192009
+            },
+            {
+              "participantId": "harshita-vyr2",
+              "participantName": "Harshita",
+              "distanceKm": 5.414354011348143
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plan-with-babes-pbtd",
+      "groupName": "Plan with babes",
+      "category": "pub",
+      "createdBy": "Akhil",
+      "createdAt": "2026-03-31T07:51:28.531Z",
+      "hostLocation": {
+        "mode": "gps",
+        "label": "Current location",
+        "address": "Captured from device GPS",
+        "lat": 12.893436668679822,
+        "lng": 77.70988317503772
+      },
+      "participants": [
+        {
+          "id": "akhil-6uay",
+          "name": "Akhil",
+          "joinedAt": "2026-03-31T07:51:28.531Z",
+          "location": {
+            "mode": "gps",
+            "label": "Current location",
+            "address": "Captured from device GPS",
+            "lat": 12.893436668679822,
+            "lng": 77.70988317503772
+          }
+        },
+        {
+          "id": "harshita-siiq",
+          "name": "Harshita",
+          "joinedAt": "2026-03-31T07:51:49.743Z",
+          "location": {
+            "mode": "manual",
+            "label": "Kempegowda International Airport",
+            "address": "KIAL T2 Exit Road, Bengaluru, Karnataka",
+            "lat": 13.1976048,
+            "lng": 77.70748564,
+            "placeId": "321562810393"
+          }
+        }
+      ],
+      "destinations": []
+    },
+    {
+      "id": "taph-1uhf",
+      "groupName": "TAPH",
+      "category": "pub",
+      "createdBy": "Akhilesh",
+      "createdAt": "2026-03-31T07:49:24.046Z",
+      "hostLocation": {
+        "mode": "gps",
+        "label": "Current location",
+        "address": "Captured from device GPS",
+        "lat": 12.893396659880501,
+        "lng": 77.71001714872891
+      },
+      "participants": [
+        {
+          "id": "akhilesh-758l",
+          "name": "Akhilesh",
+          "joinedAt": "2026-03-31T07:49:24.046Z",
+          "location": {
+            "mode": "gps",
+            "label": "Current location",
+            "address": "Captured from device GPS",
+            "lat": 12.893396659880501,
+            "lng": 77.71001714872891
+          }
+        },
+        {
+          "id": "tushar-6fe8",
+          "name": "Tushar",
+          "joinedAt": "2026-03-31T07:49:58.843Z",
+          "location": {
+            "mode": "manual",
+            "label": "Kempegowda International Airport",
+            "address": "KIAL T2 Exit Road, Bengaluru, Karnataka",
+            "lat": 13.1976048,
+            "lng": 77.70748564,
+            "placeId": "321562810393"
+          }
+        },
+        {
+          "id": "agam-8iuz",
+          "name": "Agam",
+          "joinedAt": "2026-03-31T07:50:30.406Z",
+          "location": {
+            "mode": "manual",
+            "label": "Indiranagara",
+            "address": "Indiranagara, Karnataka",
+            "lat": 17.0533579,
+            "lng": 76.6841202,
+            "placeId": "321341665554"
+          }
+        }
+      ],
+      "destinations": []
+    },
+    {
+      "id": "unlegals-jz5k",
+      "groupName": "Unlegals",
+      "category": "pub",
+      "createdBy": "Akhilesh",
+      "createdAt": "2026-03-31T06:48:31.456Z",
+      "hostLocation": {
+        "mode": "gps",
+        "label": "Current location",
+        "address": "Captured from device GPS",
+        "lat": 12.893386717474254,
+        "lng": 77.70991663193581
+      },
+      "participants": [
+        {
+          "id": "akhilesh-jyjk",
+          "name": "Akhilesh",
+          "joinedAt": "2026-03-31T06:48:31.456Z",
+          "location": {
+            "mode": "gps",
+            "label": "Current location",
+            "address": "Captured from device GPS",
+            "lat": 12.893386717474254,
+            "lng": 77.70991663193581
+          }
+        },
+        {
+          "id": "rahul-ne7e",
+          "name": "Rahul",
+          "joinedAt": "2026-03-31T06:49:18.337Z",
+          "location": {
+            "mode": "manual",
+            "label": "Kempegowda International Airport",
+            "address": "KIAL T2 Exit Road, Bengaluru, Karnataka",
+            "lat": 13.1976048,
+            "lng": 77.70748564,
+            "placeId": "321562810393"
+          }
+        },
+        {
+          "id": "harshita-5bmk",
+          "name": "Harshita",
+          "joinedAt": "2026-03-31T06:50:50.835Z",
+          "location": {
+            "mode": "manual",
+            "label": "Kormangala 7th Block",
+            "address": "80 Feet Road, Kormangala East, Bengaluru, Karnataka",
+            "lat": 12.9302496,
+            "lng": 77.6332091,
+            "placeId": "323028154112"
+          }
+        }
+      ],
+      "destinations": [
+        {
+          "placeId": "322205114099",
+          "name": "ABV - Artisanal Bier Village",
+          "address": "ABV - Artisanal Bier Village, Whitefield Road, Tigalarapalya, Hoodi, Bengaluru, Bangalore East, Karnataka, 560048, India",
+          "type": "pub",
+          "lat": 12.99142715,
+          "lng": 77.71967877,
+          "fairness": 4,
+          "averageDistanceKm": 15.16524145260576,
+          "distances": [
+            {
+              "participantId": "akhilesh-jyjk",
+              "participantName": "Akhilesh",
+              "distanceKm": 10.952810452990263
+            },
+            {
+              "participantId": "rahul-ne7e",
+              "participantName": "Rahul",
+              "distanceKm": 22.963910040740227
+            },
+            {
+              "participantId": "harshita-5bmk",
+              "participantName": "Harshita",
+              "distanceKm": 11.57900386408679
+            }
+          ]
+        },
+        {
+          "placeId": "320489645571",
+          "name": "Maize & Malt",
+          "address": "Maize & Malt, 4th Main Road, Devasandra Industrial Estate, Chikka Devasandra, Bengaluru, Bangalore East, Karnataka, 560048, India",
+          "type": "pub",
+          "lat": 12.9954315,
+          "lng": 77.7009639,
+          "fairness": 3,
+          "averageDistanceKm": 14.73227545834393,
+          "distances": [
+            {
+              "participantId": "akhilesh-jyjk",
+              "participantName": "Akhilesh",
+              "distanceKm": 11.388264514821781
+            },
+            {
+              "participantId": "rahul-ne7e",
+              "participantName": "Rahul",
+              "distanceKm": 22.491738524175968
+            },
+            {
+              "participantId": "harshita-5bmk",
+              "participantName": "Harshita",
+              "distanceKm": 10.316823336034044
+            }
+          ]
+        },
+        {
+          "placeId": "324096763291",
+          "name": "Skyline Rooftop Bar & Kitchen",
+          "address": "Skyline Rooftop Bar & Kitchen, Service Road, Dodda Nekkundi, Bengaluru, Bangalore East, Karnataka, 560048, India",
+          "type": "pub",
+          "lat": 12.9794409,
+          "lng": 77.6952936,
+          "fairness": 0,
+          "averageDistanceKm": 14.22150158997875,
+          "distances": [
+            {
+              "participantId": "akhilesh-jyjk",
+              "participantName": "Akhilesh",
+              "distanceKm": 9.699129130844275
+            },
+            {
+              "participantId": "rahul-ne7e",
+              "participantName": "Rahul",
+              "distanceKm": 24.294630878106737
+            },
+            {
+              "participantId": "harshita-5bmk",
+              "participantName": "Harshita",
+              "distanceKm": 8.670744760985237
+            }
+          ]
+        },
+        {
+          "placeId": "324094830632",
+          "name": "Toit ORR East",
+          "address": "Toit ORR East, 9th Street, Ferns Paradise, Mahadevapura, Bengaluru, Bangalore East, Karnataka, 560048, India",
+          "type": "pub",
+          "lat": 12.9808974,
+          "lng": 77.6967931,
+          "fairness": 0,
+          "averageDistanceKm": 14.285904126016135,
+          "distances": [
+            {
+              "participantId": "akhilesh-jyjk",
+              "participantName": "Akhilesh",
+              "distanceKm": 9.834129886009103
+            },
+            {
+              "participantId": "rahul-ne7e",
+              "participantName": "Rahul",
+              "distanceKm": 24.124575063010607
+            },
+            {
+              "participantId": "harshita-5bmk",
+              "participantName": "Harshita",
+              "distanceKm": 8.899007429028691
+            }
+          ]
+        },
+        {
+          "placeId": "324249018706",
+          "name": "Oasis Brewery",
+          "address": "Oasis Brewery, Whitefield Road, Devasandra, Bengaluru, Bangalore East, Karnataka, 560036, India",
+          "type": "pub",
+          "lat": 12.9973786,
+          "lng": 77.6910719,
+          "fairness": 0,
+          "averageDistanceKm": 14.60856377552365,
+          "distances": [
+            {
+              "participantId": "akhilesh-jyjk",
+              "participantName": "Akhilesh",
+              "distanceKm": 11.74231757438263
+            },
+            {
+              "participantId": "rahul-ne7e",
+              "participantName": "Rahul",
+              "distanceKm": 22.334991476010778
+            },
+            {
+              "participantId": "harshita-5bmk",
+              "participantName": "Harshita",
+              "distanceKm": 9.748382276177546
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unlegals-n69k",
+      "groupName": "Unlegals",
+      "category": "pub",
+      "createdBy": "Akhilesh",
+      "createdAt": "2026-03-31T06:37:48.097Z",
+      "hostLocation": {
+        "mode": "gps",
+        "label": "Current location",
+        "address": "Captured from device GPS",
+        "lat": 12.8933912837815,
+        "lng": 77.7098874812874
+      },
+      "participants": [
+        {
+          "id": "akhilesh-izgj",
+          "name": "Akhilesh",
+          "joinedAt": "2026-03-31T06:37:48.097Z",
+          "location": {
+            "mode": "gps",
+            "label": "Current location",
+            "address": "Captured from device GPS",
+            "lat": 12.8933912837815,
+            "lng": 77.7098874812874
+          }
+        },
+        {
+          "id": "rahul-dt42",
+          "name": "Rahul",
+          "joinedAt": "2026-03-31T06:38:16.481Z",
+          "location": {
+            "mode": "manual",
+            "label": "Toit ORR East",
+            "address": "9th Street, Mahadevapura, Bengaluru, Karnataka",
+            "lat": 12.9808974,
+            "lng": 77.6967931,
+            "placeId": "324094830632"
+          }
+        },
+        {
+          "id": "harshita-l5x5",
+          "name": "Harshita",
+          "joinedAt": "2026-03-31T06:39:10.062Z",
+          "location": {
+            "mode": "manual",
+            "label": "Food Hall",
+            "address": "Mahatma Gandhi Road, Agaram, Bengaluru, Karnataka",
+            "lat": 12.973545,
+            "lng": 77.6204172,
+            "placeId": "321271184216"
+          }
+        }
+      ]
+    },
+    {
+      "id": "unlegals-z6x7",
+      "groupName": "Unlegals",
+      "category": "pub",
+      "createdBy": "Akhilesh",
+      "createdAt": "2026-03-31T06:29:50.476Z",
+      "hostLocation": {
+        "mode": "gps",
+        "label": "Current location",
+        "address": "Captured from device GPS",
+        "lat": 12.8933841947332,
+        "lng": 77.71008962035516
+      },
+      "participants": [
+        {
+          "id": "akhilesh-n8at",
+          "name": "Akhilesh",
+          "joinedAt": "2026-03-31T06:29:50.476Z",
+          "location": {
+            "mode": "gps",
+            "label": "Current location",
+            "address": "Captured from device GPS",
+            "lat": 12.8933841947332,
+            "lng": 77.71008962035516
+          }
+        },
+        {
+          "id": "rahul-1rze",
+          "name": "Rahul",
+          "joinedAt": "2026-03-31T06:30:44.210Z",
+          "location": {
+            "mode": "manual",
+            "label": "Toit ORR East",
+            "address": "9th Street, Mahadevapura, Bengaluru, Karnataka",
+            "lat": 12.9808974,
+            "lng": 77.6967931,
+            "placeId": "324094830632"
+          }
+        },
+        {
+          "id": "rahul-8go9",
+          "name": "Rahul",
+          "joinedAt": "2026-03-31T06:32:44.399Z",
+          "location": {
+            "mode": "manual",
+            "label": "Toit ORR East",
+            "address": "9th Street, Mahadevapura, Bengaluru, Karnataka",
+            "lat": 12.9808974,
+            "lng": 77.6967931,
+            "placeId": "324094830632"
+          }
+        }
+      ]
+    }
+  ]
+}
