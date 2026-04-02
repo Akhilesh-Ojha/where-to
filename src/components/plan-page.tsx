@@ -347,16 +347,20 @@ export function PlanPage({ planId }: { planId: string }) {
 
           <button
             onClick={handleFindDestinations}
-            disabled={plan.participants.length < 2 || placesLoading}
+            disabled={plan.participants.length < 2 || placesLoading || plan.destinations.length > 0}
             className={[
               "mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-semibold transition",
-              plan.participants.length >= 2 && !placesLoading
+              plan.participants.length >= 2 && !placesLoading && plan.destinations.length === 0
                 ? "bg-amber-300 text-slate-950"
                 : "bg-white/10 text-white/40",
             ].join(" ")}
           >
             <Route className="h-4 w-4" />
-            {placesLoading ? "Finding destinations..." : "Find best destination"}
+            {placesLoading
+              ? "Finding destinations..."
+              : plan.destinations.length > 0
+                ? "Destinations locked"
+                : "Find best destination"}
           </button>
 
           {plan.participants.length < 2 ? (
@@ -465,6 +469,26 @@ function DestinationCard({
           : "border-white/8 bg-white/[0.03]",
       ].join(" ")}
     >
+      {place.photoUrls.length > 0 ? (
+        <div className="-mx-1 mb-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {place.photoUrls.map((photoUrl, photoIndex) => (
+            <div
+              key={`${place.placeId}-photo-${photoIndex}`}
+              className="relative h-44 min-w-[88%] snap-center overflow-hidden rounded-2xl border border-white/8 bg-white/[0.03]"
+            >
+              <img
+                src={photoUrl}
+                alt={`${place.name} photo ${photoIndex + 1}`}
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover"
+              />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent" />
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">

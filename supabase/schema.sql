@@ -37,7 +37,8 @@ create table if not exists public.destinations (
 
 alter table public.destinations
   add column if not exists rating double precision,
-  add column if not exists user_rating_count integer;
+  add column if not exists user_rating_count integer,
+  add column if not exists photo_urls jsonb not null default '[]'::jsonb;
 
 create table if not exists public.destination_votes (
   plan_id text not null references public.plans(id) on delete cascade,
@@ -61,6 +62,13 @@ create table if not exists public.api_daily_usage (
   usage_date date not null default current_date,
   request_count integer not null default 0,
   primary key (service_key, usage_date)
+);
+
+create table if not exists public.api_rate_limits (
+  bucket_key text not null,
+  window_started_at timestamptz not null,
+  request_count integer not null default 0,
+  primary key (bucket_key, window_started_at)
 );
 
 create or replace function public.consume_daily_api_quota(service_name text, daily_limit integer)
@@ -87,6 +95,46 @@ begin
   update public.api_daily_usage
   set request_count = request_count + 1
   where service_key = service_name and usage_date = current_date;
+
+  return true;
+end;
+$$;
+
+create or replace function public.consume_rate_limit(
+  bucket_name text,
+  window_seconds integer,
+  request_limit integer
+)
+returns boolean
+language plpgsql
+as $$
+declare
+  current_window timestamptz;
+  current_count integer;
+begin
+  current_window :=
+    to_timestamp(floor(extract(epoch from now()) / greatest(window_seconds, 1)) * greatest(window_seconds, 1));
+
+  insert into public.api_rate_limits (bucket_key, window_started_at, request_count)
+  values (bucket_name, current_window, 0)
+  on conflict (bucket_key, window_started_at) do nothing;
+
+  select request_count
+  into current_count
+  from public.api_rate_limits
+  where bucket_key = bucket_name and window_started_at = current_window
+  for update;
+
+  if current_count >= request_limit then
+    return false;
+  end if;
+
+  update public.api_rate_limits
+  set request_count = request_count + 1
+  where bucket_key = bucket_name and window_started_at = current_window;
+
+  delete from public.api_rate_limits
+  where window_started_at < now() - interval '2 hours';
 
   return true;
 end;

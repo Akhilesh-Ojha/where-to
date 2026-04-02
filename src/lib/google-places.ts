@@ -15,6 +15,9 @@ type GooglePlace = {
     latitude?: number;
     longitude?: number;
   };
+  photos?: Array<{
+    name?: string;
+  }>;
 };
 
 type GoogleTextSearchResponse = {
@@ -34,6 +37,7 @@ export type GoogleSuggestion = {
   type: string;
   rating: number | null;
   userRatingCount: number | null;
+  photoUrls: string[];
 };
 
 const DEFAULT_AUTOCOMPLETE_DAILY_LIMIT = 300;
@@ -88,6 +92,7 @@ function mapGooglePlace(place: GooglePlace): GoogleSuggestion | null {
     type: place.primaryType || "place",
     rating: typeof place.rating === "number" ? place.rating : null,
     userRatingCount: typeof place.userRatingCount === "number" ? place.userRatingCount : null,
+    photoUrls: [],
   };
 }
 
@@ -113,6 +118,50 @@ function dedupeSuggestions(suggestions: GoogleSuggestion[], limit: number) {
   }
 
   return unique;
+}
+
+async function fetchPhotoUri(photoName: string, maxWidthPx = 800) {
+  const response = await fetch(
+    `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=${maxWidthPx}&skipHttpRedirect=true`,
+    {
+      headers: {
+        "X-Goog-Api-Key": getApiKey(),
+      },
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const payload = (await response.json()) as { photoUri?: string };
+  return payload.photoUri || null;
+}
+
+async function attachPhotoUrls(places: GooglePlace[], suggestions: GoogleSuggestion[]) {
+  return Promise.all(
+    suggestions.map(async (suggestion) => {
+      const sourcePlace = places.find((place) => place.id === suggestion.placeId);
+      const photoNames = (sourcePlace?.photos || [])
+        .map((photo) => photo.name)
+        .filter((value): value is string => Boolean(value))
+        .slice(0, 3);
+
+      if (photoNames.length === 0) {
+        return suggestion;
+      }
+
+      const photoUrls = (
+        await Promise.all(photoNames.map((photoName) => fetchPhotoUri(photoName)))
+      ).filter((value): value is string => Boolean(value));
+
+      return {
+        ...suggestion,
+        photoUrls,
+      };
+    }),
+  );
 }
 
 export async function searchPlacesByText(input: {
@@ -187,7 +236,7 @@ export async function searchNearbyPlaces(input: {
       "Content-Type": "application/json",
       "X-Goog-Api-Key": apiKey,
       "X-Goog-FieldMask":
-        "places.id,places.displayName,places.formattedAddress,places.location,places.primaryType,places.rating,places.userRatingCount",
+        "places.id,places.displayName,places.formattedAddress,places.location,places.primaryType,places.rating,places.userRatingCount,places.photos",
     },
     body: JSON.stringify({
       textQuery: buildCategorySearchText(input.category, input.subcategory),
@@ -213,8 +262,9 @@ export async function searchNearbyPlaces(input: {
   }
 
   const data = (await response.json()) as GoogleNearbySearchResponse;
-  return dedupeSuggestions(
+  const suggestions = dedupeSuggestions(
     (data.places || []).map(mapGooglePlace).filter(Boolean) as GoogleSuggestion[],
     input.limit ?? 10,
   );
+  return attachPhotoUrls(data.places || [], suggestions);
 }

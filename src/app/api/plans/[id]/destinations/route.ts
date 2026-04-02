@@ -2,12 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { rankPlaces, type SuggestedPlace } from "@/lib/destinations";
 import { searchNearbyPlaces } from "@/lib/google-places";
 import { getPlan, savePlanDestinations } from "@/lib/plans";
+import { consumeShortWindowRateLimit, getRequestIpAddress } from "@/lib/rate-limit";
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
   try {
+    await consumeShortWindowRateLimit({
+      scope: "destinations",
+      identifier: getRequestIpAddress(request.headers),
+    });
+
     const { id } = await context.params;
     const plan = await getPlan(id);
 
@@ -53,6 +59,7 @@ export async function POST(
       lng: place.lng,
       rating: place.rating,
       userRatingCount: place.userRatingCount,
+      photoUrls: place.photoUrls,
     }));
 
     const destinations = rankPlaces(places, plan.participants);
@@ -60,9 +67,12 @@ export async function POST(
 
     return NextResponse.json({ plan: updatedPlan, destinations });
   } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to fetch nearby destinations.";
+    const status = message.includes("Too many destination fetches right now") ? 429 : 500;
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to fetch nearby destinations." },
-      { status: 500 },
+      { error: message },
+      { status },
     );
   }
 }

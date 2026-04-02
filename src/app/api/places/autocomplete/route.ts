@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchPlacesByText } from "@/lib/google-places";
+import { consumeShortWindowRateLimit, getRequestIpAddress } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as {
@@ -17,6 +18,11 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    await consumeShortWindowRateLimit({
+      scope: "autocomplete",
+      identifier: getRequestIpAddress(request.headers),
+    });
+
     const suggestions = await searchPlacesByText({
       query: input,
       lat: body.locationBias?.latitude,
@@ -26,9 +32,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ suggestions });
   } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to reach Google Places text search.";
+    const status = message.includes("Too many place searches right now") ? 429 : 500;
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to reach Google Places text search." },
-      { status: 500 },
+      { error: message },
+      { status },
     );
   }
 }

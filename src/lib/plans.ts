@@ -42,6 +42,7 @@ export type DestinationRecord = {
   lng: number;
   rating: number | null;
   userRatingCount: number | null;
+  photoUrls: string[];
   fairness: number;
   averageDistanceKm: number;
   distances: DestinationDistance[];
@@ -96,6 +97,7 @@ type DestinationRow = {
   lng: number;
   rating: number | null;
   user_rating_count: number | null;
+  photo_urls: string[];
   fairness: number;
   average_distance_km: number;
   distances: DestinationDistance[];
@@ -168,6 +170,7 @@ function mapPlanRecord(
       lng: destination.lng,
       rating: destination.rating,
       userRatingCount: destination.user_rating_count,
+      photoUrls: destination.photo_urls || [],
       fairness: destination.fairness,
       averageDistanceKm: destination.average_distance_km,
       distances: destination.distances,
@@ -282,7 +285,7 @@ export async function getPlan(planId: string) {
       supabase
         .from("destinations")
         .select(
-          "plan_id, sort_order, place_id, name, address, type, lat, lng, rating, user_rating_count, fairness, average_distance_km, distances",
+          "plan_id, sort_order, place_id, name, address, type, lat, lng, rating, user_rating_count, photo_urls, fairness, average_distance_km, distances",
         )
         .eq("plan_id", planId)
         .order("sort_order", { ascending: true })
@@ -389,6 +392,7 @@ export async function savePlanDestinations(planId: string, destinations: Destina
       lng: destination.lng,
       rating: destination.rating,
       user_rating_count: destination.userRatingCount,
+      photo_urls: destination.photoUrls,
       fairness: destination.fairness,
       average_distance_km: destination.averageDistanceKm,
       distances: destination.distances,
