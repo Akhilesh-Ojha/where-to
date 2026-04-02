@@ -446,6 +446,9 @@ export function HomePage() {
           </button>
 
           {createError ? <p className="text-sm text-rose-300">{createError}</p> : null}
+          <p className="text-center text-[11px] tracking-[0.08em] text-white/34">
+            Built by Akhil for indecisive groups.
+          </p>
         </form>
       </div>
     </main>
