@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Crosshair, LoaderCircle, Search } from "lucide-react";
 import { buildMapUrl } from "@/lib/destinations";
-import { storeParticipantId } from "@/lib/participant-session";
+import { getStoredParticipantId, storeParticipantId } from "@/lib/participant-session";
 import type { PlanRecord } from "@/lib/plans";
 
 type PlaceSuggestion = {
@@ -46,6 +46,7 @@ export function JoinPage({ planId }: { planId: string }) {
   const [placesLoading, setPlacesLoading] = useState(false);
   const [placesError, setPlacesError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [checkingExistingJoin, setCheckingExistingJoin] = useState(true);
   const [submitError, setSubmitError] = useState("");
   const [manualSelectionLocked, setManualSelectionLocked] = useState(false);
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 350);
@@ -53,6 +54,53 @@ export function JoinPage({ planId }: { planId: string }) {
 
   const displayPlanName = useMemo(() => prettifyPlanName(planId) || "Group Plan", [planId]);
   const canJoin = Boolean(name.trim() && location);
+
+  useEffect(() => {
+    let cancelled = false;
+    const storedParticipantId = getStoredParticipantId(planId);
+
+    if (!storedParticipantId) {
+      setCheckingExistingJoin(false);
+      return;
+    }
+
+    async function checkExistingJoin() {
+      try {
+        const response = await fetch(`/api/plans/${planId}`, { cache: "no-store" });
+        const payload = (await response.json()) as { plan?: PlanRecord } | undefined;
+
+        if (!response.ok || !payload?.plan || cancelled) {
+          if (!cancelled) {
+            setCheckingExistingJoin(false);
+          }
+          return;
+        }
+
+        const participantStillExists = payload.plan.participants.some(
+          (participant) => participant.id === storedParticipantId,
+        );
+
+        if (participantStillExists) {
+          router.replace(`/plan/${planId}`);
+          return;
+        }
+
+        if (!cancelled) {
+          setCheckingExistingJoin(false);
+        }
+      } catch {
+        if (!cancelled) {
+          setCheckingExistingJoin(false);
+        }
+      }
+    }
+
+    void checkExistingJoin();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [planId, router]);
 
   useEffect(() => {
     const query = debouncedSearchQuery.trim();
@@ -180,6 +228,19 @@ export function JoinPage({ planId }: { planId: string }) {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  if (checkingExistingJoin) {
+    return (
+      <main className="min-h-screen overflow-x-hidden bg-[#09090c] text-white">
+        <div className="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-x-hidden px-4 py-5">
+          <div className="flex items-center gap-3 rounded-[1.8rem] border border-white/10 bg-white/[0.04] p-4">
+            <LoaderCircle className="h-5 w-5 animate-spin text-amber-300" />
+            <p className="text-sm text-white/70">Checking your join status...</p>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (
