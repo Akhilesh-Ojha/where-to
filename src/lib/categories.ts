@@ -48,7 +48,6 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
       { id: "pub", label: "Pub", searchText: "pub" },
       { id: "bar", label: "Bar", searchText: "bar" },
       { id: "brewery", label: "Brewery", searchText: "brewery" },
-      { id: "wine_bar", label: "Wine Bar", searchText: "wine bar" },
       { id: "bar_and_grill", label: "Bar & Grill", searchText: "bar and grill" },
     ],
   },
