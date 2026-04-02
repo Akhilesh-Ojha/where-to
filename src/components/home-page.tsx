@@ -361,16 +361,16 @@ export function HomePage() {
             </div>
           </section>
 
-          <section className="rounded-[1.8rem] border border-white/10 bg-white/[0.04] p-4">
-            <div className="flex items-center justify-between">
-              <div>
+          <section className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/[0.04] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
                 <p className="text-[11px] uppercase tracking-[0.32em] text-emerald-300/70">Location</p>
                 <p className="mt-1 text-sm text-white/70">Use GPS or search manually.</p>
               </div>
               <button
                 type="button"
                 onClick={handleUseCurrentLocation}
-                className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-950"
+                className="shrink-0 rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-950"
               >
                 <span className="inline-flex items-center gap-2">
                   <Crosshair className="h-3.5 w-3.5" />
@@ -395,7 +395,7 @@ export function HomePage() {
 
             {locationError ? <p className="mt-3 text-sm text-rose-300">{locationError}</p> : null}
 
-            <div className="relative mt-3">
+            <div className="relative mt-3 min-w-0">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
               <input
                 value={searchQuery}
@@ -408,7 +408,7 @@ export function HomePage() {
                   );
                 }}
                 placeholder="Search area or landmark"
-                className="h-12 w-full rounded-2xl border border-white/10 bg-black/20 pl-11 pr-4 text-base text-white outline-none placeholder:text-white/30 focus:border-amber-300/40 md:text-sm"
+                className="h-12 min-w-0 w-full rounded-2xl border border-white/10 bg-black/20 pl-11 pr-4 text-base text-white outline-none placeholder:text-white/30 focus:border-amber-300/40 md:text-sm"
               />
             </div>
 

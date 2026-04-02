@@ -146,7 +146,7 @@ async function attachPhotoUrls(places: GooglePlace[], suggestions: GoogleSuggest
       const photoNames = (sourcePlace?.photos || [])
         .map((photo) => photo.name)
         .filter((value): value is string => Boolean(value))
-        .slice(0, 3);
+        .slice(0, 5);
 
       if (photoNames.length === 0) {
         return suggestion;

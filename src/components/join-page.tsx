@@ -320,7 +320,7 @@ export function JoinPage({ planId }: { planId: string }) {
 
             {locationError ? <p className="mt-3 text-sm text-rose-300">{locationError}</p> : null}
 
-            <div className="relative mt-3">
+            <div className="relative mt-3 min-w-0">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
               <input
                 value={searchQuery}

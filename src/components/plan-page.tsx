@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, Copy, LoaderCircle, Route, Share2, Star } from "lucide-react";
+import Confetti from "react-confetti";
 import { getCategoryFilterLabel, getCategoryLabel } from "@/lib/categories";
 import { buildMapUrl } from "@/lib/destinations";
 import { getStoredParticipantId } from "@/lib/participant-session";
@@ -28,6 +29,9 @@ export function PlanPage({ planId }: { planId: string }) {
   const [sortBy, setSortBy] = useState<"fairness" | "rating">("fairness");
   const [voteSavingPlaceId, setVoteSavingPlaceId] = useState<string | null>(null);
   const [voteError, setVoteError] = useState("");
+  const [decisionPopupOpen, setDecisionPopupOpen] = useState(false);
+  const [lastCelebratedDecisionKey, setLastCelebratedDecisionKey] = useState<string | null>(null);
+  const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
 
   const inviteLink = `${getBaseUrl()}/join/${planId}`;
   const midpoint = useMemo(() => {
@@ -105,9 +109,56 @@ export function PlanPage({ planId }: { planId: string }) {
     return plan.destinations.reduce((highest, destination) => Math.max(highest, destination.voteCount), 0);
   }, [plan]);
 
+  const leadingDestinations = useMemo(() => {
+    if (!plan || highestVoteCount <= 0) {
+      return [];
+    }
+
+    return plan.destinations.filter((destination) => destination.voteCount === highestVoteCount);
+  }, [highestVoteCount, plan]);
+
+  const allVotesIn = Boolean(plan && plan.participants.length > 0 && plan.votes.length === plan.participants.length && highestVoteCount > 0);
+  const hasVoteTie = allVotesIn && leadingDestinations.length > 1;
+  const winningDestination = !hasVoteTie && allVotesIn ? leadingDestinations[0] || null : null;
+  const decisionKey = useMemo(() => {
+    if (!allVotesIn) {
+      return null;
+    }
+
+    if (hasVoteTie) {
+      return `tie:${leadingDestinations.map((destination) => destination.placeId).sort().join(",")}:${highestVoteCount}`;
+    }
+
+    if (winningDestination) {
+      return `winner:${winningDestination.placeId}:${highestVoteCount}`;
+    }
+
+    return null;
+  }, [allVotesIn, hasVoteTie, highestVoteCount, leadingDestinations, winningDestination]);
+
   useEffect(() => {
     setCurrentParticipantId(getStoredParticipantId(planId));
   }, [planId]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    function syncViewportSize() {
+      setViewportSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    }
+
+    syncViewportSize();
+    window.addEventListener("resize", syncViewportSize);
+
+    return () => {
+      window.removeEventListener("resize", syncViewportSize);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -146,6 +197,15 @@ export function PlanPage({ planId }: { planId: string }) {
       window.clearInterval(interval);
     };
   }, [planId]);
+
+  useEffect(() => {
+    if (!decisionKey || decisionKey === lastCelebratedDecisionKey) {
+      return;
+    }
+
+    setDecisionPopupOpen(true);
+    setLastCelebratedDecisionKey(decisionKey);
+  }, [decisionKey, lastCelebratedDecisionKey]);
 
   async function handleFindDestinations() {
     if (!plan || plan.participants.length < 2) {
@@ -430,6 +490,15 @@ export function PlanPage({ planId }: { planId: string }) {
           ) : null}
         </section>
       </div>
+
+      {decisionPopupOpen && allVotesIn ? (
+        <DecisionModal
+          winner={winningDestination}
+          tiedDestinations={hasVoteTie ? leadingDestinations : []}
+          onClose={() => setDecisionPopupOpen(false)}
+          viewportSize={viewportSize}
+        />
+      ) : null}
     </main>
   );
 }
@@ -439,6 +508,141 @@ function Stat({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-3">
       <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">{label}</p>
       <p className="mt-1 text-lg font-semibold">{value}</p>
+    </div>
+  );
+}
+
+function DecisionModal({
+  winner,
+  tiedDestinations,
+  onClose,
+  viewportSize,
+}: {
+  winner: DestinationRecord | null;
+  tiedDestinations: DestinationRecord[];
+  onClose: () => void;
+  viewportSize: { width: number; height: number };
+}) {
+  const hasTie = tiedDestinations.length > 1;
+
+  if (hasTie) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
+        {viewportSize.width > 0 && viewportSize.height > 0 ? (
+          <Confetti
+            width={viewportSize.width}
+            height={viewportSize.height}
+            numberOfPieces={160}
+            gravity={0.16}
+            recycle={false}
+            tweenDuration={9000}
+            colors={["#FCD34D", "#FDE68A", "#FFFFFF", "#F59E0B"]}
+          />
+        ) : null}
+        <div className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-amber-200/20 bg-[linear-gradient(180deg,rgba(251,191,36,0.18),rgba(14,14,18,0.97))] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute right-4 top-4 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/70"
+          >
+            Close
+          </button>
+          <p className="relative text-[11px] uppercase tracking-[0.32em] text-amber-100/80">Votes complete</p>
+          <h3 className="relative mt-2 text-2xl font-semibold text-amber-50">It&apos;s a tie</h3>
+          <p className="relative mt-2 text-sm leading-6 text-amber-50/78">
+            Everyone has voted, but the group is split between these picks. Choose either one and you&apos;re set.
+          </p>
+          <div className="relative mt-4 grid gap-2">
+            {tiedDestinations.map((destination) => (
+              <a
+                key={destination.placeId}
+                href={buildMapUrl(destination.lat, destination.lng, destination.name)}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-2xl border border-amber-100/18 bg-white/8 px-4 py-3 text-sm font-semibold text-amber-50"
+              >
+                <div>{destination.name}</div>
+                <div className="mt-1 text-xs font-normal text-amber-50/65">
+                  {destination.voteCount} votes · {destination.averageDistanceKm.toFixed(1)} km avg distance
+                </div>
+              </a>
+            ))}
+          </div>
+          <div className="relative mt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-slate-950"
+            >
+              Back to results
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!winner) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
+      {viewportSize.width > 0 && viewportSize.height > 0 ? (
+        <Confetti
+          width={viewportSize.width}
+          height={viewportSize.height}
+          numberOfPieces={190}
+          gravity={0.18}
+          recycle={false}
+          tweenDuration={10000}
+          colors={["#6EE7B7", "#A7F3D0", "#FDE68A", "#FFFFFF", "#34D399"]}
+        />
+      ) : null}
+      <div className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-emerald-200/18 bg-[linear-gradient(180deg,rgba(16,185,129,0.2),rgba(14,14,18,0.97))] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/70"
+        >
+          Close
+        </button>
+        <p className="relative text-[11px] uppercase tracking-[0.32em] text-emerald-100/80">Decision made</p>
+        <h3 className="relative mt-2 text-2xl font-semibold text-emerald-50">{winner.name}</h3>
+        <p className="relative mt-2 text-sm leading-6 text-emerald-50/80">
+          Everyone has voted. This place won, so the group can stop comparing and head here.
+        </p>
+        <div className="relative mt-4 flex flex-wrap items-center gap-2">
+          <div className="rounded-full border border-emerald-100/18 bg-white/8 px-3 py-2 text-xs font-semibold text-emerald-50">
+            {winner.voteCount} votes
+          </div>
+          <div className="rounded-full border border-emerald-100/18 bg-white/8 px-3 py-2 text-xs text-emerald-50/85">
+            {winner.averageDistanceKm.toFixed(1)} km avg distance
+          </div>
+          {winner.rating ? (
+            <div className="rounded-full border border-emerald-100/18 bg-white/8 px-3 py-2 text-xs text-emerald-50/85">
+              {winner.rating.toFixed(1)} rating
+            </div>
+          ) : null}
+        </div>
+        <div className="relative mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <a
+            href={buildMapUrl(winner.lat, winner.lng, winner.name)}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-center rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-slate-950"
+          >
+            Open in Maps
+          </a>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-2xl border border-white/12 bg-white/6 px-4 py-3 text-sm font-semibold text-white"
+          >
+            Back to results
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

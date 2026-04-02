@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.56.1",
+    "react-confetti": "^6.4.0",
     "next": "16.1.6",
     "react": "19.2.0",
     "react-dom": "19.2.0",
