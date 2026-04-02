@@ -251,8 +251,8 @@ export function HomePage() {
   }
 
   return (
-    <main className="min-h-dvh bg-[#09090c] text-white">
-      <div className="mx-auto w-full max-w-md px-4 py-5 pb-5">
+    <main className="min-h-dvh overscroll-y-contain bg-[#09090c] text-white">
+      <div className="mx-auto w-full max-w-md px-4 py-5 pb-8">
         <div className="mb-4">
           <h1 className="text-[2.9rem] leading-[0.92] text-white sm:text-[3.4rem]">Where To</h1>
           <p className="mt-2 max-w-[18rem] text-sm leading-6 text-white/58">
