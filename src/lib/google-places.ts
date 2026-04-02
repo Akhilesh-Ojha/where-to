@@ -91,6 +91,30 @@ function mapGooglePlace(place: GooglePlace): GoogleSuggestion | null {
   };
 }
 
+function dedupeSuggestions(suggestions: GoogleSuggestion[], limit: number) {
+  const seen = new Set<string>();
+  const unique: GoogleSuggestion[] = [];
+
+  for (const suggestion of suggestions) {
+    const key = `${suggestion.placeId}::${suggestion.text.trim().toLowerCase()}::${suggestion.secondaryText
+      .trim()
+      .toLowerCase()}`;
+
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    unique.push(suggestion);
+
+    if (unique.length >= limit) {
+      break;
+    }
+  }
+
+  return unique;
+}
+
 export async function searchPlacesByText(input: {
   query: string;
   lat?: number;
@@ -139,7 +163,10 @@ export async function searchPlacesByText(input: {
   }
 
   const data = (await response.json()) as GoogleTextSearchResponse;
-  return (data.places || []).map(mapGooglePlace).filter(Boolean) as GoogleSuggestion[];
+  return dedupeSuggestions(
+    (data.places || []).map(mapGooglePlace).filter(Boolean) as GoogleSuggestion[],
+    input.limit ?? 10,
+  );
 }
 
 export async function searchNearbyPlaces(input: {
@@ -186,5 +213,8 @@ export async function searchNearbyPlaces(input: {
   }
 
   const data = (await response.json()) as GoogleNearbySearchResponse;
-  return (data.places || []).map(mapGooglePlace).filter(Boolean) as GoogleSuggestion[];
+  return dedupeSuggestions(
+    (data.places || []).map(mapGooglePlace).filter(Boolean) as GoogleSuggestion[],
+    input.limit ?? 10,
+  );
 }

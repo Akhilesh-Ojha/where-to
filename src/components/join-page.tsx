@@ -202,7 +202,7 @@ export function JoinPage({ planId }: { planId: string }) {
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   placeholder="Name"
-                  className="h-12 rounded-2xl border border-white/10 bg-black/20 px-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-amber-300/40"
+                  className="h-12 rounded-2xl border border-white/10 bg-black/20 px-4 text-base text-white outline-none placeholder:text-white/30 focus:border-amber-300/40 md:text-sm"
                 />
               </label>
 
@@ -272,7 +272,7 @@ export function JoinPage({ planId }: { planId: string }) {
                   );
                 }}
                 placeholder="Search area or landmark"
-                className="h-12 min-w-0 w-full rounded-2xl border border-white/10 bg-black/20 pl-11 pr-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-amber-300/40"
+                className="h-12 min-w-0 w-full rounded-2xl border border-white/10 bg-black/20 pl-11 pr-4 text-base text-white outline-none placeholder:text-white/30 focus:border-amber-300/40 md:text-sm"
               />
             </div>
 

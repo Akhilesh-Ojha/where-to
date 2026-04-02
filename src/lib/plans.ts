@@ -189,7 +189,6 @@ export async function createPlan(input: {
   hostLocation: SavedLocation;
 }) {
   const supabase = getSupabaseAdmin();
-  await cleanupExpiredPlans();
   const id = buildPlanId(input.groupName);
   const createdAt = new Date().toISOString();
 
@@ -226,11 +225,20 @@ export async function createPlan(input: {
     throw new Error(participantError.message);
   }
 
-  const plan = await getPlan(id);
+  void cleanupExpiredPlans().catch(() => undefined);
 
-  if (!plan) {
-    throw new Error("Created plan could not be loaded.");
-  }
+  const plan: PlanRecord = {
+    id,
+    groupName: input.groupName,
+    category: input.category,
+    subcategory: input.subcategory || null,
+    createdBy: input.createdBy,
+    createdAt,
+    hostLocation: input.hostLocation,
+    participants: [hostParticipant],
+    destinations: [],
+    votes: [],
+  };
 
   return { plan, participant: hostParticipant };
 }

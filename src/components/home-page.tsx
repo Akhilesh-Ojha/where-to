@@ -88,6 +88,7 @@ export function HomePage() {
   const [placesLoading, setPlacesLoading] = useState(false);
   const [placesError, setPlacesError] = useState("");
   const [creatingPlan, setCreatingPlan] = useState(false);
+  const [redirectingToHost, setRedirectingToHost] = useState(false);
   const [createError, setCreateError] = useState("");
   const [manualSelectionLocked, setManualSelectionLocked] = useState(false);
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 350);
@@ -95,6 +96,7 @@ export function HomePage() {
   const selectedCategory = getCategoryDefinition(form.category);
 
   const canCreate = Boolean(form.hostName.trim() && form.groupName.trim() && location);
+  const createDisabled = !canCreate || creatingPlan || redirectingToHost;
 
   useEffect(() => {
     const query = debouncedSearchQuery.trim();
@@ -169,6 +171,7 @@ export function HomePage() {
 
     try {
       setCreatingPlan(true);
+      setRedirectingToHost(false);
       setCreateError("");
 
       const response = await fetch("/api/plans", {
@@ -196,11 +199,12 @@ export function HomePage() {
         storeParticipantId(payload.plan.id, payload.participant.id);
       }
 
+      setRedirectingToHost(true);
       router.push(`/plan/${payload.plan.id}`);
     } catch {
       setCreateError("Could not create the plan right now.");
-    } finally {
       setCreatingPlan(false);
+      setRedirectingToHost(false);
     }
   }
 
@@ -404,7 +408,7 @@ export function HomePage() {
                   );
                 }}
                 placeholder="Search area or landmark"
-                className="h-12 w-full rounded-2xl border border-white/10 bg-black/20 pl-11 pr-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-amber-300/40"
+                className="h-12 w-full rounded-2xl border border-white/10 bg-black/20 pl-11 pr-4 text-base text-white outline-none placeholder:text-white/30 focus:border-amber-300/40 md:text-sm"
               />
             </div>
 
@@ -430,15 +434,15 @@ export function HomePage() {
 
           <button
             type="submit"
-            disabled={!canCreate || creatingPlan}
+            disabled={createDisabled}
             className={[
               "flex h-14 items-center justify-center rounded-2xl text-sm font-semibold transition",
-              canCreate && !creatingPlan
+              !createDisabled
                 ? "bg-amber-300 text-slate-950"
                 : "bg-white/10 text-white/40",
             ].join(" ")}
           >
-            {creatingPlan ? "Creating plan..." : "Create plan"}
+            {redirectingToHost ? "Opening host room..." : creatingPlan ? "Creating plan..." : "Create plan"}
           </button>
 
           {createError ? <p className="text-sm text-rose-300">{createError}</p> : null}
@@ -471,7 +475,7 @@ function Field({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="h-12 rounded-2xl border border-white/10 bg-black/20 px-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-amber-300/40"
+        className="h-12 rounded-2xl border border-white/10 bg-black/20 px-4 text-base text-white outline-none placeholder:text-white/30 focus:border-amber-300/40 md:text-sm"
       />
     </label>
   );
