@@ -3,6 +3,7 @@ export type CategoryId =
   | "pub"
   | "cafe"
   | "wellness"
+  | "sports"
   | "shopping"
   | "movies"
   | "events";
@@ -72,6 +73,20 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
       { id: "gym", label: "Gym", searchText: "gym" },
       { id: "yoga", label: "Yoga", searchText: "yoga studio" },
       { id: "spa", label: "Spa", searchText: "spa" },
+      { id: "swimming", label: "Swimming", searchText: "swimming pool" },
+    ],
+  },
+  {
+    id: "sports",
+    label: "Sports",
+    summaryLabel: "Sports",
+    defaultSearchText: "sports complex",
+    filters: [
+      { id: "badminton", label: "Badminton", searchText: "badminton court" },
+      { id: "football", label: "Football", searchText: "football turf" },
+      { id: "cricket", label: "Cricket", searchText: "cricket turf" },
+      { id: "basketball", label: "Basketball", searchText: "basketball court" },
+      { id: "tennis", label: "Tennis", searchText: "tennis court" },
     ],
   },
   {

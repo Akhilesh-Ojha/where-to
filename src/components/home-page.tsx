@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   Search,
   Sparkles,
+  Volleyball,
   UtensilsCrossed,
   Waves,
 } from "lucide-react";
@@ -56,6 +57,7 @@ const categories: CategoryOption[] = [
   { id: "pub", label: "Nightlife", icon: Martini, glow: "from-amber-300/30 to-rose-400/20" },
   { id: "cafe", label: "Cafe", icon: Coffee, glow: "from-stone-200/30 to-amber-300/20" },
   { id: "wellness", label: "Wellness", icon: Waves, glow: "from-emerald-300/30 to-teal-400/20" },
+  { id: "sports", label: "Sports", icon: Volleyball, glow: "from-cyan-300/30 to-sky-400/20" },
   { id: "shopping", label: "Shopping", icon: ShoppingBag, glow: "from-sky-300/30 to-blue-400/20" },
   { id: "movies", label: "Movies", icon: Clapperboard, glow: "from-violet-300/30 to-indigo-400/20" },
   { id: "events", label: "Activities", icon: Sparkles, glow: "from-fuchsia-300/30 to-violet-400/20" },
@@ -249,8 +251,8 @@ export function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#09090c] text-white">
-      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 py-5">
+    <main className="min-h-dvh bg-[#09090c] text-white">
+      <div className="mx-auto w-full max-w-md px-4 py-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
         <div className="mb-4">
           <h1 className="text-[2.9rem] leading-[0.92] text-white sm:text-[3.4rem]">Where To</h1>
           <p className="mt-2 max-w-[18rem] text-sm leading-6 text-white/58">
@@ -332,7 +334,7 @@ export function HomePage() {
                       type="button"
                       onClick={() => setForm((current) => ({ ...current, subcategory: null }))}
                       className={[
-                        "rounded-full border px-2.5 py-1 text-[9px] font-semibold tracking-[0.08em] transition",
+                        "rounded-full border px-2 py-0.5 text-[6px] font-semibold tracking-[0.04em] transition",
                         form.subcategory === null
                           ? "border-amber-200/85 bg-[linear-gradient(135deg,rgba(251,191,36,0.26),rgba(245,158,11,0.12))] text-amber-50 shadow-[0_0_0_1px_rgba(253,230,138,0.35),0_10px_24px_rgba(245,158,11,0.18)]"
                           : "border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] text-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/15 hover:bg-white/[0.05] hover:text-white/82",
@@ -346,7 +348,7 @@ export function HomePage() {
                         type="button"
                         onClick={() => setForm((current) => ({ ...current, subcategory: filter.id }))}
                         className={[
-                          "rounded-full border px-2.5 py-1 text-[9px] font-semibold tracking-[0.08em] transition",
+                          "rounded-full border px-2 py-0.5 text-[6px] font-semibold tracking-[0.04em] transition",
                           form.subcategory === filter.id
                             ? "border-amber-200/85 bg-[linear-gradient(135deg,rgba(251,191,36,0.26),rgba(245,158,11,0.12))] text-amber-50 shadow-[0_0_0_1px_rgba(253,230,138,0.35),0_10px_24px_rgba(245,158,11,0.18)]"
                             : "border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] text-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/15 hover:bg-white/[0.05] hover:text-white/82",
