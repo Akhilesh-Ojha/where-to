@@ -1,15 +1,7 @@
 import { getSupabaseAdmin } from "@/lib/supabase-server";
+import type { CategoryId } from "@/lib/categories";
 
 const PLAN_TTL_HOURS = 24;
-
-export type CategoryId =
-  | "pub"
-  | "brewery"
-  | "cafe"
-  | "restaurant"
-  | "gym"
-  | "mall"
-  | "custom";
 
 export type SavedLocation =
   | {
@@ -48,26 +40,38 @@ export type DestinationRecord = {
   type: string;
   lat: number;
   lng: number;
+  rating: number | null;
+  userRatingCount: number | null;
   fairness: number;
   averageDistanceKm: number;
   distances: DestinationDistance[];
+  voteCount: number;
+};
+
+export type VoteRecord = {
+  participantId: string;
+  destinationPlaceId: string;
+  createdAt: string;
 };
 
 export type PlanRecord = {
   id: string;
   groupName: string;
   category: CategoryId;
+  subcategory: string | null;
   createdBy: string;
   createdAt: string;
   hostLocation: SavedLocation;
   participants: ParticipantRecord[];
   destinations: DestinationRecord[];
+  votes: VoteRecord[];
 };
 
 type PlanRow = {
   id: string;
   group_name: string;
   category: CategoryId;
+  subcategory: string | null;
   created_by: string;
   created_at: string;
   host_location: SavedLocation;
@@ -90,9 +94,18 @@ type DestinationRow = {
   type: string;
   lat: number;
   lng: number;
+  rating: number | null;
+  user_rating_count: number | null;
   fairness: number;
   average_distance_km: number;
   distances: DestinationDistance[];
+};
+
+type VoteRow = {
+  plan_id: string;
+  participant_id: string;
+  destination_place_id: string;
+  created_at: string;
 };
 
 function slugify(value: string) {
@@ -125,11 +138,18 @@ function mapPlanRecord(
   plan: PlanRow,
   participants: ParticipantRow[],
   destinations: DestinationRow[],
+  votes: VoteRow[],
 ): PlanRecord {
+  const voteCounts = votes.reduce<Record<string, number>>((counts, vote) => {
+    counts[vote.destination_place_id] = (counts[vote.destination_place_id] || 0) + 1;
+    return counts;
+  }, {});
+
   return {
     id: plan.id,
     groupName: plan.group_name,
     category: plan.category,
+    subcategory: plan.subcategory,
     createdBy: plan.created_by,
     createdAt: plan.created_at,
     hostLocation: plan.host_location,
@@ -146,9 +166,17 @@ function mapPlanRecord(
       type: destination.type,
       lat: destination.lat,
       lng: destination.lng,
+      rating: destination.rating,
+      userRatingCount: destination.user_rating_count,
       fairness: destination.fairness,
       averageDistanceKm: destination.average_distance_km,
       distances: destination.distances,
+      voteCount: voteCounts[destination.place_id] || 0,
+    })),
+    votes: votes.map((vote) => ({
+      participantId: vote.participant_id,
+      destinationPlaceId: vote.destination_place_id,
+      createdAt: vote.created_at,
     })),
   };
 }
@@ -156,6 +184,7 @@ function mapPlanRecord(
 export async function createPlan(input: {
   groupName: string;
   category: CategoryId;
+  subcategory?: string | null;
   createdBy: string;
   hostLocation: SavedLocation;
 }) {
@@ -175,6 +204,7 @@ export async function createPlan(input: {
     id,
     group_name: input.groupName,
     category: input.category,
+    subcategory: input.subcategory || null,
     created_by: input.createdBy,
     created_at: createdAt,
     host_location: input.hostLocation,
@@ -202,7 +232,7 @@ export async function createPlan(input: {
     throw new Error("Created plan could not be loaded.");
   }
 
-  return plan;
+  return { plan, participant: hostParticipant };
 }
 
 export async function getPlan(planId: string) {
@@ -210,7 +240,7 @@ export async function getPlan(planId: string) {
 
   const { data: plan, error: planError } = await supabase
     .from("plans")
-    .select("id, group_name, category, created_by, created_at, host_location")
+    .select("id, group_name, category, subcategory, created_by, created_at, host_location")
     .eq("id", planId)
     .maybeSingle();
 
@@ -229,7 +259,11 @@ export async function getPlan(planId: string) {
     return null;
   }
 
-  const [{ data: participants, error: participantsError }, { data: destinations, error: destinationsError }] =
+  const [
+    { data: participants, error: participantsError },
+    { data: destinations, error: destinationsError },
+    { data: votes, error: votesError },
+  ] =
     await Promise.all([
       supabase
         .from("participants")
@@ -240,11 +274,16 @@ export async function getPlan(planId: string) {
       supabase
         .from("destinations")
         .select(
-          "plan_id, sort_order, place_id, name, address, type, lat, lng, fairness, average_distance_km, distances",
+          "plan_id, sort_order, place_id, name, address, type, lat, lng, rating, user_rating_count, fairness, average_distance_km, distances",
         )
         .eq("plan_id", planId)
         .order("sort_order", { ascending: true })
         .returns<DestinationRow[]>(),
+      supabase
+        .from("destination_votes")
+        .select("plan_id, participant_id, destination_place_id, created_at")
+        .eq("plan_id", planId)
+        .returns<VoteRow[]>(),
     ]);
 
   if (participantsError) {
@@ -255,10 +294,15 @@ export async function getPlan(planId: string) {
     throw new Error(destinationsError.message);
   }
 
+  if (votesError) {
+    throw new Error(votesError.message);
+  }
+
   return mapPlanRecord(
     normalizedPlan,
     (participants as ParticipantRow[] | null) || [],
     (destinations as DestinationRow[] | null) || [],
+    (votes as VoteRow[] | null) || [],
   );
 }
 
@@ -319,6 +363,12 @@ export async function savePlanDestinations(planId: string, destinations: Destina
     throw new Error(deleteError.message);
   }
 
+  const { error: deleteVotesError } = await supabase.from("destination_votes").delete().eq("plan_id", planId);
+
+  if (deleteVotesError) {
+    throw new Error(deleteVotesError.message);
+  }
+
   if (destinations.length > 0) {
     const rows = destinations.map((destination, index) => ({
       plan_id: planId,
@@ -329,6 +379,8 @@ export async function savePlanDestinations(planId: string, destinations: Destina
       type: destination.type,
       lat: destination.lat,
       lng: destination.lng,
+      rating: destination.rating,
+      user_rating_count: destination.userRatingCount,
       fairness: destination.fairness,
       average_distance_km: destination.averageDistanceKm,
       distances: destination.distances,
@@ -353,4 +405,44 @@ export async function cleanupExpiredPlans() {
   if (error) {
     throw new Error(error.message);
   }
+}
+
+export async function saveParticipantVote(
+  planId: string,
+  input: { participantId: string; destinationPlaceId: string },
+) {
+  const supabase = getSupabaseAdmin();
+  const plan = await getPlan(planId);
+
+  if (!plan) {
+    return null;
+  }
+
+  const participantExists = plan.participants.some((participant) => participant.id === input.participantId);
+
+  if (!participantExists) {
+    throw new Error("Only joined participants can vote.");
+  }
+
+  const destinationExists = plan.destinations.some((destination) => destination.placeId === input.destinationPlaceId);
+
+  if (!destinationExists) {
+    throw new Error("Destination not found for this plan.");
+  }
+
+  const { error } = await supabase.from("destination_votes").upsert(
+    {
+      plan_id: planId,
+      participant_id: input.participantId,
+      destination_place_id: input.destinationPlaceId,
+      created_at: new Date().toISOString(),
+    },
+    { onConflict: "plan_id,participant_id" },
+  );
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return getPlan(planId);
 }

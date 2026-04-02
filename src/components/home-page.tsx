@@ -3,19 +3,21 @@
 import { FormEvent, type ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Beer,
+  Clapperboard,
   Check,
   Coffee,
   Crosshair,
-  Dumbbell,
-  LoaderCircle,
   Martini,
-  Search,
+  LoaderCircle,
   ShoppingBag,
+  Search,
   Sparkles,
-  Store,
+  UtensilsCrossed,
+  Waves,
 } from "lucide-react";
-import type { CategoryId, SavedLocation } from "@/lib/plans";
+import { getCategoryDefinition, type CategoryId } from "@/lib/categories";
+import { storeParticipantId } from "@/lib/participant-session";
+import type { SavedLocation } from "@/lib/plans";
 
 type CategoryOption = {
   id: CategoryId;
@@ -50,19 +52,20 @@ type LocationSelection =
     };
 
 const categories: CategoryOption[] = [
-  { id: "pub", label: "Pub", icon: Martini, glow: "from-amber-300/30 to-rose-400/20" },
-  { id: "brewery", label: "Brewery", icon: Beer, glow: "from-yellow-300/30 to-orange-400/20" },
+  { id: "restaurant", label: "Restaurant", icon: UtensilsCrossed, glow: "from-orange-300/30 to-rose-400/20" },
+  { id: "pub", label: "Nightlife", icon: Martini, glow: "from-amber-300/30 to-rose-400/20" },
   { id: "cafe", label: "Cafe", icon: Coffee, glow: "from-stone-200/30 to-amber-300/20" },
-  { id: "restaurant", label: "Restaurant", icon: Store, glow: "from-pink-300/30 to-orange-300/20" },
-  { id: "gym", label: "Gym", icon: Dumbbell, glow: "from-emerald-300/30 to-teal-400/20" },
-  { id: "mall", label: "Mall", icon: ShoppingBag, glow: "from-sky-300/30 to-blue-400/20" },
-  { id: "custom", label: "Custom", icon: Sparkles, glow: "from-fuchsia-300/30 to-violet-400/20" },
+  { id: "wellness", label: "Wellness", icon: Waves, glow: "from-emerald-300/30 to-teal-400/20" },
+  { id: "shopping", label: "Shopping", icon: ShoppingBag, glow: "from-sky-300/30 to-blue-400/20" },
+  { id: "movies", label: "Movies", icon: Clapperboard, glow: "from-violet-300/30 to-indigo-400/20" },
+  { id: "events", label: "Activities", icon: Sparkles, glow: "from-fuchsia-300/30 to-violet-400/20" },
 ];
 
 const initialForm = {
   hostName: "",
   groupName: "",
-  category: "brewery" as CategoryId,
+  category: "restaurant" as CategoryId,
+  subcategory: null as string | null,
 };
 
 function useDebouncedValue<T>(value: T, delayMs: number) {
@@ -86,8 +89,10 @@ export function HomePage() {
   const [placesError, setPlacesError] = useState("");
   const [creatingPlan, setCreatingPlan] = useState(false);
   const [createError, setCreateError] = useState("");
+  const [manualSelectionLocked, setManualSelectionLocked] = useState(false);
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 350);
   const router = useRouter();
+  const selectedCategory = getCategoryDefinition(form.category);
 
   const canCreate = Boolean(form.hostName.trim() && form.groupName.trim() && location);
 
@@ -172,16 +177,23 @@ export function HomePage() {
         body: JSON.stringify({
           groupName: form.groupName.trim(),
           category: form.category,
+          subcategory: form.subcategory,
           createdBy: form.hostName.trim(),
           hostLocation: location as SavedLocation,
         }),
       });
 
-      const payload = (await response.json()) as { plan?: { id: string }; error?: string } | undefined;
+      const payload = (await response.json()) as
+        | { plan?: { id: string }; participant?: { id: string }; error?: string }
+        | undefined;
 
       if (!response.ok || !payload?.plan) {
         setCreateError(payload?.error || "Could not create the plan right now.");
         return;
+      }
+
+      if (payload.participant?.id) {
+        storeParticipantId(payload.plan.id, payload.participant.id);
       }
 
       router.push(`/plan/${payload.plan.id}`);
@@ -199,6 +211,7 @@ export function HomePage() {
     }
 
     setLocationError("");
+    setManualSelectionLocked(false);
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -220,6 +233,7 @@ export function HomePage() {
     setPlacesError("");
     setSearchQuery(place.text);
     setPlaceSuggestions([]);
+    setManualSelectionLocked(true);
     setLocation({
       mode: "manual",
       label: place.text,
@@ -273,7 +287,13 @@ export function HomePage() {
                       <button
                         key={category.id}
                         type="button"
-                        onClick={() => setForm((current) => ({ ...current, category: category.id }))}
+                        onClick={() =>
+                          setForm((current) => ({
+                            ...current,
+                            category: category.id,
+                            subcategory: null,
+                          }))
+                        }
                         className={[
                           "relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition",
                           active
@@ -294,6 +314,46 @@ export function HomePage() {
                   })}
                 </div>
               </div>
+
+              {selectedCategory.filters.length > 0 ? (
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/45">
+                      Filter
+                    </p>
+                    <p className="text-[11px] text-white/35">Optional</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setForm((current) => ({ ...current, subcategory: null }))}
+                      className={[
+                        "rounded-full border px-2.5 py-1 text-[9px] font-semibold tracking-[0.08em] transition",
+                        form.subcategory === null
+                          ? "border-amber-200/85 bg-[linear-gradient(135deg,rgba(251,191,36,0.26),rgba(245,158,11,0.12))] text-amber-50 shadow-[0_0_0_1px_rgba(253,230,138,0.35),0_10px_24px_rgba(245,158,11,0.18)]"
+                          : "border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] text-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/15 hover:bg-white/[0.05] hover:text-white/82",
+                      ].join(" ")}
+                    >
+                      All {selectedCategory.summaryLabel}
+                    </button>
+                    {selectedCategory.filters.map((filter) => (
+                      <button
+                        key={filter.id}
+                        type="button"
+                        onClick={() => setForm((current) => ({ ...current, subcategory: filter.id }))}
+                        className={[
+                          "rounded-full border px-2.5 py-1 text-[9px] font-semibold tracking-[0.08em] transition",
+                          form.subcategory === filter.id
+                            ? "border-amber-200/85 bg-[linear-gradient(135deg,rgba(251,191,36,0.26),rgba(245,158,11,0.12))] text-amber-50 shadow-[0_0_0_1px_rgba(253,230,138,0.35),0_10px_24px_rgba(245,158,11,0.18)]"
+                            : "border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] text-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/15 hover:bg-white/[0.05] hover:text-white/82",
+                        ].join(" ")}
+                      >
+                        {filter.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </section>
 
@@ -335,7 +395,14 @@ export function HomePage() {
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
               <input
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  setSearchQuery(nextValue);
+                  setManualSelectionLocked(
+                    location?.mode === "manual" &&
+                      nextValue.trim().toLowerCase() === location.label.trim().toLowerCase(),
+                  );
+                }}
                 placeholder="Search area or landmark"
                 className="h-12 w-full rounded-2xl border border-white/10 bg-black/20 pl-11 pr-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-amber-300/40"
               />
@@ -345,7 +412,7 @@ export function HomePage() {
               {placesLoading ? (
                 <InlineNotice icon={<LoaderCircle className="h-4 w-4 animate-spin" />} text="Finding places..." />
               ) : null}
-              {location?.mode !== "manual" &&
+              {!manualSelectionLocked &&
                 placeSuggestions.slice(0, 10).map((place) => (
                   <button
                     key={place.placeId}

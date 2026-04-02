@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createPlan, type CategoryId, type SavedLocation } from "@/lib/plans";
+import { createPlan, type SavedLocation } from "@/lib/plans";
+import type { CategoryId } from "@/lib/categories";
 
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as {
       groupName?: string;
       category?: CategoryId;
+      subcategory?: string | null;
       createdBy?: string;
       hostLocation?: SavedLocation;
     };
@@ -17,14 +19,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const plan = await createPlan({
+    const result = await createPlan({
       groupName: body.groupName.trim(),
       category: body.category,
+      subcategory: body.subcategory || null,
       createdBy: body.createdBy.trim(),
       hostLocation: body.hostLocation,
     });
 
-    return NextResponse.json({ plan }, { status: 201 });
+    return NextResponse.json(result, { status: 201 });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Could not create the plan right now." },

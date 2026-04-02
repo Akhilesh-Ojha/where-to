@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Crosshair, LoaderCircle, Search } from "lucide-react";
 import { buildMapUrl } from "@/lib/destinations";
+import { storeParticipantId } from "@/lib/participant-session";
 import type { PlanRecord } from "@/lib/plans";
 
 type PlaceSuggestion = {
@@ -46,6 +47,7 @@ export function JoinPage({ planId }: { planId: string }) {
   const [placesError, setPlacesError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [manualSelectionLocked, setManualSelectionLocked] = useState(false);
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 350);
   const router = useRouter();
 
@@ -117,6 +119,7 @@ export function JoinPage({ planId }: { planId: string }) {
     }
 
     setLocationError("");
+    setManualSelectionLocked(false);
     navigator.geolocation.getCurrentPosition(
       (position) =>
         setLocation({
@@ -136,6 +139,7 @@ export function JoinPage({ planId }: { planId: string }) {
     setPlacesError("");
     setSearchQuery(place.text);
     setPlaceSuggestions([]);
+    setManualSelectionLocked(true);
     setLocation({
       mode: "manual",
       label: place.text,
@@ -160,10 +164,15 @@ export function JoinPage({ planId }: { planId: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name.trim(), location }),
       });
-      const payload = (await response.json()) as { error?: string; plan?: PlanRecord } | undefined;
+      const payload = (await response.json()) as
+        | { error?: string; plan?: PlanRecord; participant?: { id: string } }
+        | undefined;
       if (!response.ok) {
         setSubmitError(payload?.error || "Could not join this plan right now.");
         return;
+      }
+      if (payload?.participant?.id) {
+        storeParticipantId(planId, payload.participant.id);
       }
       router.push(`/plan/${planId}`);
     } catch {
@@ -174,16 +183,16 @@ export function JoinPage({ planId }: { planId: string }) {
   }
 
   return (
-    <main className="min-h-screen bg-[#09090c] text-white">
-      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 py-5">
+    <main className="min-h-screen overflow-x-hidden bg-[#09090c] text-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-x-hidden px-4 py-5">
         <div className="mb-4">
           <p className="text-[11px] uppercase tracking-[0.38em] text-amber-300/80">Where To</p>
-          <h1 className="mt-2 text-3xl leading-none">Join {displayPlanName}</h1>
+          <h1 className="mt-2 max-w-[18rem] break-words text-3xl leading-none">Join {displayPlanName}</h1>
           <p className="mt-2 text-sm text-white/55">Add your name and one accurate location.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="grid gap-4">
-          <section className="rounded-[1.8rem] border border-white/10 bg-white/[0.04] p-4">
+          <section className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/[0.04] p-4">
             <div className="grid gap-3">
               <label className="grid gap-2">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/45">
@@ -197,28 +206,28 @@ export function JoinPage({ planId }: { planId: string }) {
                 />
               </label>
 
-              <div className="flex items-center justify-between rounded-2xl border border-white/8 bg-black/20 px-4 py-3">
-                <div>
+              <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-black/20 px-4 py-3">
+                <div className="min-w-0">
                   <p className="text-xs uppercase tracking-[0.26em] text-white/40">Plan</p>
-                  <p className="mt-1 text-sm font-semibold">{displayPlanName}</p>
+                  <p className="mt-1 truncate text-sm font-semibold">{displayPlanName}</p>
                 </div>
-                <span className="rounded-full bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white/45">
+                <span className="max-w-[11rem] truncate rounded-full bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white/45">
                   {planId}
                 </span>
               </div>
             </div>
           </section>
 
-          <section className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))] p-4">
-            <div className="flex items-center justify-between">
-              <div>
+          <section className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))] p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <p className="text-[11px] uppercase tracking-[0.32em] text-emerald-300/70">Location</p>
                 <p className="mt-1 text-sm text-white/65">Use GPS or search manually.</p>
               </div>
               <button
                 type="button"
                 onClick={handleUseCurrentLocation}
-                className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-950"
+                className="w-fit shrink-0 rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-950"
               >
                 <span className="inline-flex items-center gap-2">
                   <Crosshair className="h-3.5 w-3.5" />
@@ -228,7 +237,7 @@ export function JoinPage({ planId }: { planId: string }) {
             </div>
 
             {location ? (
-              <div className="mt-3 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-3">
+              <div className="mt-3 overflow-hidden rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-3">
                 <div className="flex items-start gap-3">
                   <div className="rounded-full bg-emerald-300/15 p-2 text-emerald-200">
                     <Check className="h-4 w-4" />
@@ -238,7 +247,7 @@ export function JoinPage({ planId }: { planId: string }) {
                       href={buildMapUrl(location.lat, location.lng, location.label)}
                       target="_blank"
                       rel="noreferrer"
-                      className="truncate text-sm font-semibold underline decoration-emerald-300/30 underline-offset-4"
+                      className="block truncate text-sm font-semibold underline decoration-emerald-300/30 underline-offset-4"
                     >
                       {location.label}
                     </a>
@@ -254,9 +263,16 @@ export function JoinPage({ planId }: { planId: string }) {
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
               <input
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  setSearchQuery(nextValue);
+                  setManualSelectionLocked(
+                    location?.mode === "manual" &&
+                      nextValue.trim().toLowerCase() === location.label.trim().toLowerCase(),
+                  );
+                }}
                 placeholder="Search area or landmark"
-                className="h-12 w-full rounded-2xl border border-white/10 bg-black/20 pl-11 pr-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-amber-300/40"
+                className="h-12 min-w-0 w-full rounded-2xl border border-white/10 bg-black/20 pl-11 pr-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-amber-300/40"
               />
             </div>
 
@@ -267,7 +283,7 @@ export function JoinPage({ planId }: { planId: string }) {
                   Finding places...
                 </div>
               ) : null}
-              {location?.mode !== "manual" &&
+              {!manualSelectionLocked &&
                 placeSuggestions.slice(0, 10).map((place) => (
                   <button
                     key={place.placeId}

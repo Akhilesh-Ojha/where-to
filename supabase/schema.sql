@@ -2,10 +2,14 @@ create table if not exists public.plans (
   id text primary key,
   group_name text not null,
   category text not null,
+  subcategory text,
   created_by text not null,
   created_at timestamptz not null default now(),
   host_location jsonb not null
 );
+
+alter table public.plans
+  add column if not exists subcategory text;
 
 create table if not exists public.participants (
   id text primary key,
@@ -31,8 +35,59 @@ create table if not exists public.destinations (
   created_at timestamptz not null default now()
 );
 
+alter table public.destinations
+  add column if not exists rating double precision,
+  add column if not exists user_rating_count integer;
+
+create table if not exists public.destination_votes (
+  plan_id text not null references public.plans(id) on delete cascade,
+  participant_id text not null references public.participants(id) on delete cascade,
+  destination_place_id text not null,
+  created_at timestamptz not null default now(),
+  primary key (plan_id, participant_id)
+);
+
 create index if not exists participants_plan_id_joined_at_idx
   on public.participants (plan_id, joined_at);
 
 create index if not exists destinations_plan_id_sort_order_idx
   on public.destinations (plan_id, sort_order);
+
+create index if not exists destination_votes_plan_id_idx
+  on public.destination_votes (plan_id, destination_place_id);
+
+create table if not exists public.api_daily_usage (
+  service_key text not null,
+  usage_date date not null default current_date,
+  request_count integer not null default 0,
+  primary key (service_key, usage_date)
+);
+
+create or replace function public.consume_daily_api_quota(service_name text, daily_limit integer)
+returns boolean
+language plpgsql
+as $$
+declare
+  current_count integer;
+begin
+  insert into public.api_daily_usage (service_key, usage_date, request_count)
+  values (service_name, current_date, 0)
+  on conflict (service_key, usage_date) do nothing;
+
+  select request_count
+  into current_count
+  from public.api_daily_usage
+  where service_key = service_name and usage_date = current_date
+  for update;
+
+  if current_count >= daily_limit then
+    return false;
+  end if;
+
+  update public.api_daily_usage
+  set request_count = request_count + 1
+  where service_key = service_name and usage_date = current_date;
+
+  return true;
+end;
+$$;

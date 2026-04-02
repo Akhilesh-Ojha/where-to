@@ -15,16 +15,17 @@ A Next.js starter for a group meetup app that helps friends find fair meeting sp
 2. Create a Supabase project.
 3. Run [supabase/schema.sql](/Users/harshitasingh/where-to/supabase/schema.sql) in the Supabase SQL editor.
 4. Copy `.env.example` to `.env.local`.
-5. Set `LOCATIONIQ_API_KEY`, `SUPABASE_URL`, and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.
+5. Set `GOOGLE_MAPS_API_KEY`, `GOOGLE_PLACES_AUTOCOMPLETE_DAILY_LIMIT`, `GOOGLE_PLACES_NEARBY_DAILY_LIMIT`, `SUPABASE_URL`, and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.
 6. From this folder, run `npm install`.
 7. Start the app with `npm run dev`.
 
-## LocationIQ wiring
+## Google Places wiring
 
-- Manual location search now calls LocationIQ autocomplete through `/api/places/autocomplete`.
-- Manual selections already include exact latitude and longitude, so no extra place-details step is needed.
-- Meetup venue suggestions can be fetched through `/api/places/nearby`.
+- Manual location search now calls Google Places through `/api/places/autocomplete`.
+- Meetup venue suggestions now call Google Places through `/api/places/nearby`.
 - The API key stays server-side inside the Next.js routes.
+- The current integration requests only the basic fields needed for labels and coordinates.
+- The app also enforces its own daily caps through Supabase-backed counters before calling Google Places.
 
 ## Supabase wiring
 
@@ -39,4 +40,4 @@ A Next.js starter for a group meetup app that helps friends find fair meeting sp
 - Create-plan form
 - Join-plan flow with location capture
 - Realtime participant updates
-- LocationIQ meetup suggestion ranking
+- Google Places meetup suggestion ranking

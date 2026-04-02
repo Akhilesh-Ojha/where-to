@@ -7,6 +7,8 @@ export type SuggestedPlace = {
   type: string;
   lat: number;
   lng: number;
+  rating: number | null;
+  userRatingCount: number | null;
 };
 
 export function formatCoords(lat: number, lng: number) {
@@ -36,10 +38,44 @@ export function haversineDistanceKm(
   return 2 * earthRadiusKm * Math.asin(Math.sqrt(a));
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
 export function rankPlaces(
   places: SuggestedPlace[],
   participants: ParticipantRecord[],
 ): DestinationRecord[] {
+  const centroid = participants.reduce(
+    (sum, participant) => {
+      sum.lat += participant.location.lat;
+      sum.lng += participant.location.lng;
+      return sum;
+    },
+    { lat: 0, lng: 0 },
+  );
+
+  const groupCenter = {
+    lat: centroid.lat / participants.length,
+    lng: centroid.lng / participants.length,
+  };
+
+  const groupSpreadKm = participants.reduce((largest, participant) => {
+    const distanceFromCenter = haversineDistanceKm(
+      { lat: participant.location.lat, lng: participant.location.lng },
+      groupCenter,
+    );
+
+    return Math.max(largest, distanceFromCenter);
+  }, 0);
+
+  const targetAverageDistanceKm = Math.max(1.5, groupSpreadKm * 1.75 + 0.75);
+  const targetFairnessGapKm = Math.max(0.75, groupSpreadKm * 0.85 + 0.5);
+  const closenessWeight = groupSpreadKm <= 2 ? 0.72 : groupSpreadKm <= 5 ? 0.6 : 0.48;
+  const fairnessWeight = 1 - closenessWeight;
+  const fairnessToleranceKm = Math.max(1.25, groupSpreadKm * 0.45 + 0.75);
+  const maxDistanceToleranceKm = Math.max(3, groupSpreadKm * 1.2 + 1.5);
+
   return places
     .map((place) => {
       const distances = participants.map((participant) => {
@@ -58,15 +94,40 @@ export function rankPlaces(
       const values = distances.map((distance) => distance.distanceKm);
       const maxDistance = Math.max(...values);
       const minDistance = Math.min(...values);
+      const fairnessGapKm = maxDistance - minDistance;
       const averageDistanceKm =
         values.reduce((sum, value) => sum + value, 0) / values.length;
-      const fairness = Math.max(0, Math.round(100 - (maxDistance - minDistance) * 8));
+      const adjustedFairnessGapKm = Math.max(0, fairnessGapKm - fairnessToleranceKm);
+      const adjustedMaxDistanceKm = Math.max(0, maxDistance - maxDistanceToleranceKm);
+      const closenessScore = clamp(
+        100 - (averageDistanceKm / targetAverageDistanceKm) * 70,
+        0,
+        100,
+      );
+      const balanceScore = clamp(
+        100 - (adjustedFairnessGapKm / targetFairnessGapKm) * 100,
+        0,
+        100,
+      );
+      const extremeTravelPenalty = clamp(
+        (adjustedMaxDistanceKm / Math.max(1, targetAverageDistanceKm)) * 18,
+        0,
+        100,
+      );
+      const fairness = Math.round(
+        clamp(
+          closenessScore * closenessWeight + balanceScore * fairnessWeight - extremeTravelPenalty,
+          0,
+          100,
+        ),
+      );
 
       return {
         ...place,
         fairness,
         averageDistanceKm,
         distances,
+        voteCount: 0,
       };
     })
     .sort((left, right) => {
@@ -74,7 +135,11 @@ export function rankPlaces(
         return right.fairness - left.fairness;
       }
 
+      if ((right.rating || 0) !== (left.rating || 0)) {
+        return (right.rating || 0) - (left.rating || 0);
+      }
+
       return left.averageDistanceKm - right.averageDistanceKm;
     })
-    .slice(0, 5);
+    .slice(0, 10);
 }
