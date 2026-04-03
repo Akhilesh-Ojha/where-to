@@ -246,9 +246,9 @@ export function JoinPage({ planId }: { planId: string }) {
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#09090c] text-white">
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-x-hidden px-4 py-5">
-        <div className="mb-4">
+        <div className="mb-4 min-w-0">
           <p className="text-[11px] uppercase tracking-[0.38em] text-amber-300/80">Meetfair</p>
-          <h1 className="mt-2 max-w-[18rem] break-words text-3xl leading-none">Join {displayPlanName}</h1>
+          <h1 className="mt-2 max-w-[18rem] truncate text-3xl leading-none">Join {displayPlanName}</h1>
           <p className="mt-2 text-sm text-white/55">Add your name and one accurate location.</p>
         </div>
 
@@ -267,12 +267,12 @@ export function JoinPage({ planId }: { planId: string }) {
                 />
               </label>
 
-              <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/8 bg-black/20 px-4 py-3">
+              <div className="flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-white/8 bg-black/20 px-4 py-3">
                 <div className="min-w-0">
                   <p className="text-xs uppercase tracking-[0.26em] text-white/40">Plan</p>
                   <p className="mt-1 truncate text-sm font-semibold">{displayPlanName}</p>
                 </div>
-                <span className="max-w-[11rem] truncate rounded-full bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white/45">
+                <span className="max-w-[10rem] shrink truncate rounded-full bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-white/45">
                   {planId}
                 </span>
               </div>

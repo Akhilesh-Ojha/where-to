@@ -546,17 +546,10 @@ function DecisionModal({
           />
         ) : null}
         <div className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-amber-200/20 bg-[linear-gradient(180deg,rgba(251,191,36,0.18),rgba(14,14,18,0.97))] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute right-4 top-4 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/70"
-          >
-            Close
-          </button>
           <p className="relative text-[11px] uppercase tracking-[0.32em] text-amber-100/80">Votes complete</p>
           <h3 className="relative mt-2 text-2xl font-semibold text-amber-50">It&apos;s a tie</h3>
           <p className="relative mt-2 text-sm leading-6 text-amber-50/78">
-            Everyone has voted, but the group is split between these picks. Choose either one and you&apos;re set.
+            Everyone has voted, but the group is split between these picks. Head back and change one vote if you want a clear winner.
           </p>
           <div className="relative mt-4 grid gap-2">
             {tiedDestinations.map((destination) => (
@@ -580,7 +573,7 @@ function DecisionModal({
               onClick={onClose}
               className="w-full rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-slate-950"
             >
-              Back to results
+              Change vote
             </button>
           </div>
         </div>
@@ -606,13 +599,6 @@ function DecisionModal({
         />
       ) : null}
       <div className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-emerald-200/18 bg-[linear-gradient(180deg,rgba(16,185,129,0.2),rgba(14,14,18,0.97))] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-4 top-4 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/70"
-        >
-          Close
-        </button>
         <p className="relative text-[11px] uppercase tracking-[0.32em] text-emerald-100/80">Decision made</p>
         <h3 className="relative mt-2 text-2xl font-semibold text-emerald-50">{winner.name}</h3>
         <p className="relative mt-2 text-sm leading-6 text-emerald-50/80">
@@ -645,7 +631,7 @@ function DecisionModal({
             onClick={onClose}
             className="rounded-2xl border border-white/12 bg-white/6 px-4 py-3 text-sm font-semibold text-white"
           >
-            Back to results
+            See results
           </button>
         </div>
       </div>
@@ -764,7 +750,7 @@ function DestinationCard({
             : "bg-white/8 text-white/35",
         ].join(" ")}
       >
-        {isSaving ? "Saving vote..." : isSelected ? "Voted" : "Vote for this place"}
+        {isSaving ? "Saving vote..." : isSelected ? "Tap again to unvote" : "Vote for this place"}
       </button>
     </article>
   );

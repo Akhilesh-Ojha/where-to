@@ -442,6 +442,22 @@ export async function saveParticipantVote(
     throw new Error("Destination not found for this plan.");
   }
 
+  const existingVote = plan.votes.find((vote) => vote.participantId === input.participantId);
+
+  if (existingVote?.destinationPlaceId === input.destinationPlaceId) {
+    const { error: deleteError } = await supabase
+      .from("destination_votes")
+      .delete()
+      .eq("plan_id", planId)
+      .eq("participant_id", input.participantId);
+
+    if (deleteError) {
+      throw new Error(deleteError.message);
+    }
+
+    return getPlan(planId);
+  }
+
   const { error } = await supabase.from("destination_votes").upsert(
     {
       plan_id: planId,
