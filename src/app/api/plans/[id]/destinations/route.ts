@@ -76,7 +76,7 @@ export async function POST(
       lng: center.lng,
       category: plan.category,
       subcategory: plan.subcategory,
-      limit: 10,
+      limit: 30,
     });
 
     const places: SuggestedPlace[] = results.map((place) => ({
