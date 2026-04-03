@@ -280,7 +280,7 @@ export function JoinPage({ planId }: { planId: string }) {
           </section>
 
           <section className="overflow-hidden rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))] p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-[11px] uppercase tracking-[0.32em] text-emerald-300/70">Location</p>
                 <p className="mt-1 text-sm text-white/65">Use GPS or search manually.</p>
@@ -288,7 +288,7 @@ export function JoinPage({ planId }: { planId: string }) {
               <button
                 type="button"
                 onClick={handleUseCurrentLocation}
-                className="w-fit shrink-0 rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-950"
+                className="shrink-0 rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-950"
               >
                 <span className="inline-flex items-center gap-2">
                   <Crosshair className="h-3.5 w-3.5" />
