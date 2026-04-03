@@ -106,6 +106,12 @@ function mapGooglePlace(place: GooglePlace): GoogleSuggestion | null {
   };
 }
 
+function isGoogleSuggestion(
+  suggestion: GoogleSuggestion | null,
+): suggestion is GoogleSuggestion {
+  return Boolean(suggestion);
+}
+
 function isSpecificMeetupSuggestion(suggestion: GoogleSuggestion) {
   if (BROAD_LOCATION_TYPES.has(suggestion.type)) {
     return false;
@@ -253,8 +259,8 @@ export async function searchPlacesByText(input: {
   return dedupeSuggestions(
     (data.places || [])
       .map(mapGooglePlace)
-      .filter(Boolean)
-      .filter(isSpecificMeetupSuggestion) as GoogleSuggestion[],
+      .filter(isGoogleSuggestion)
+      .filter(isSpecificMeetupSuggestion),
     input.limit ?? 10,
   );
 }
