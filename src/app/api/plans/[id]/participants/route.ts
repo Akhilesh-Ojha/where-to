@@ -30,7 +30,9 @@ export async function POST(
     const message =
       error instanceof Error ? error.message : "Could not join this plan right now.";
     const status =
-      message.includes("nearby meetups only") || message.includes("Long-distance meetup mode")
+      message.includes("nearby meetups only") ||
+      message.includes("Long-distance meetup mode") ||
+      message.includes("plan is full")
         ? 400
         : 500;
 

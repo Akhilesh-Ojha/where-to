@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Copy, LoaderCircle, Route, Share2, Star } from "lucide-react";
+import { CheckCircle2, Coffee, Copy, LoaderCircle, Route, Share2, Star } from "lucide-react";
 import Confetti from "react-confetti";
 import { getCategoryFilterLabel, getCategoryLabel } from "@/lib/categories";
 import { buildMapUrl } from "@/lib/destinations";
@@ -16,6 +16,8 @@ function getBaseUrl() {
 
   return "http://localhost:3000";
 }
+
+const SUPPORT_URL = process.env.NEXT_PUBLIC_SUPPORT_URL?.trim() || "";
 
 export function PlanPage({ planId }: { planId: string }) {
   const [plan, setPlan] = useState<PlanRecord | null>(null);
@@ -644,6 +646,20 @@ function DecisionModal({
             See results
           </button>
         </div>
+        {SUPPORT_URL ? (
+          <div className="relative mt-4 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
+            <p className="text-xs text-white/60">Enjoyed Meetfair?</p>
+            <a
+              href={SUPPORT_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-amber-200 underline decoration-amber-200/35 underline-offset-4"
+            >
+              <Coffee className="h-4 w-4" />
+              Buy me a chai
+            </a>
+          </div>
+        ) : null}
       </div>
     </div>
   );

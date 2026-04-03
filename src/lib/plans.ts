@@ -3,6 +3,7 @@ import type { CategoryId } from "@/lib/categories";
 
 const PLAN_TTL_HOURS = 24;
 const LOCAL_MEETUP_MAX_DISTANCE_KM = 80;
+const MAX_PLAN_PARTICIPANTS = 10;
 
 export type SavedLocation =
   | {
@@ -368,6 +369,10 @@ export async function addParticipantToPlan(
 
   if (!plan) {
     return null;
+  }
+
+  if (plan.participants.length >= MAX_PLAN_PARTICIPANTS) {
+    throw new Error("This plan is full for now. Try creating a new one for a larger group.");
   }
 
   const participant: ParticipantRecord = {
