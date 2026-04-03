@@ -1,8 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Coffee, Copy, LoaderCircle, Route, Share2, Star } from "lucide-react";
+import {
+  BellRing,
+  CheckCircle2,
+  Coffee,
+  Copy,
+  LoaderCircle,
+  Route,
+  Share2,
+  Star,
+  Users,
+} from "lucide-react";
 import Confetti from "react-confetti";
 import { getCategoryFilterLabel, getCategoryLabel } from "@/lib/categories";
 import { buildMapUrl } from "@/lib/destinations";
@@ -18,6 +28,12 @@ function getBaseUrl() {
 }
 
 const SUPPORT_URL = process.env.NEXT_PUBLIC_SUPPORT_URL?.trim() || "";
+
+type InAppNotification = {
+  id: string;
+  kind: "join" | "vote";
+  title: string;
+};
 
 export function PlanPage({ planId }: { planId: string }) {
   const [plan, setPlan] = useState<PlanRecord | null>(null);
@@ -35,6 +51,8 @@ export function PlanPage({ planId }: { planId: string }) {
   const [decisionPopupOpen, setDecisionPopupOpen] = useState(false);
   const [lastCelebratedDecisionKey, setLastCelebratedDecisionKey] = useState<string | null>(null);
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
+  const [notifications, setNotifications] = useState<InAppNotification[]>([]);
+  const previousPlanRef = useRef<PlanRecord | null>(null);
 
   const inviteLink = `${getBaseUrl()}/join/${planId}`;
   const midpoint = useMemo(() => {
@@ -139,6 +157,11 @@ export function PlanPage({ planId }: { planId: string }) {
     return null;
   }, [allVotesIn, hasVoteTie, highestVoteCount, leadingDestinations, winningDestination]);
 
+  function enqueueNotification(notification: Omit<InAppNotification, "id">) {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setNotifications((current) => [...current, { ...notification, id }].slice(-4));
+  }
+
   useEffect(() => {
     setCurrentParticipantId(getStoredParticipantId(planId));
   }, [planId]);
@@ -215,6 +238,93 @@ export function PlanPage({ planId }: { planId: string }) {
     setDecisionPopupOpen(true);
     setLastCelebratedDecisionKey(decisionKey);
   }, [decisionKey, lastCelebratedDecisionKey]);
+
+  useEffect(() => {
+    if (!plan) {
+      return;
+    }
+
+    const previousPlan = previousPlanRef.current;
+
+    if (!previousPlan) {
+      previousPlanRef.current = plan;
+      return;
+    }
+
+    const previousParticipantIds = new Set(previousPlan.participants.map((participant) => participant.id));
+    const joinedParticipants = plan.participants.filter(
+      (participant) => !previousParticipantIds.has(participant.id),
+    );
+
+    if (joinedParticipants.length === 1) {
+      enqueueNotification({
+        kind: "join",
+        title: `${joinedParticipants[0].name} joined the room`,
+      });
+    } else if (joinedParticipants.length > 1) {
+      enqueueNotification({
+        kind: "join",
+        title: `${joinedParticipants.length} people joined`,
+      });
+    }
+
+    const previousVotesByParticipant = new Map(
+      previousPlan.votes.map((vote) => [vote.participantId, vote.destinationPlaceId]),
+    );
+    const previousVoteCount = previousPlan.votes.length;
+    const nextVoteCount = plan.votes.length;
+    const finalVoteJustCompleted =
+      previousVoteCount < plan.participants.length &&
+      nextVoteCount === plan.participants.length &&
+      nextVoteCount > 0;
+
+    if (!finalVoteJustCompleted) {
+      const changedVoterNames = plan.votes
+        .filter(
+          (vote) =>
+            vote.participantId !== currentParticipantId &&
+            previousVotesByParticipant.get(vote.participantId) !== vote.destinationPlaceId,
+        )
+        .map((vote) => {
+          const participant = plan.participants.find(
+            (entry) => entry.id === vote.participantId,
+          );
+          return participant?.name || "Someone";
+        });
+
+      if (changedVoterNames.length === 1) {
+        enqueueNotification({
+          kind: "vote",
+          title: `${changedVoterNames[0]} voted`,
+        });
+      } else if (changedVoterNames.length > 1) {
+        enqueueNotification({
+          kind: "vote",
+          title: `${changedVoterNames.length} new votes came in`,
+        });
+      }
+    }
+
+    previousPlanRef.current = plan;
+  }, [currentParticipantId, plan]);
+
+  useEffect(() => {
+    if (notifications.length === 0) {
+      return;
+    }
+
+    const timers = notifications.map((notification) =>
+      window.setTimeout(() => {
+        setNotifications((current) =>
+          current.filter((entry) => entry.id !== notification.id),
+        );
+      }, 4200),
+    );
+
+    return () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
+  }, [notifications]);
 
   async function handleFindDestinations() {
     if (!plan || plan.participants.length < 2) {
@@ -323,6 +433,13 @@ export function PlanPage({ planId }: { planId: string }) {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#09090c] text-white">
+      <div className="pointer-events-none fixed inset-x-0 top-3 z-40 flex justify-center px-4">
+        <div className="grid w-full max-w-md gap-2">
+          {notifications.map((notification) => (
+            <ToastCard key={notification.id} notification={notification} />
+          ))}
+        </div>
+      </div>
       <div className="mx-auto max-w-md overflow-x-hidden px-4 py-5">
         <div className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))] p-4 shadow-2xl shadow-black/30">
           <div className="flex items-start justify-between gap-3">
@@ -530,6 +647,36 @@ export function PlanPage({ planId }: { planId: string }) {
         />
       ) : null}
     </main>
+  );
+}
+
+function ToastCard({ notification }: { notification: InAppNotification }) {
+  const isJoin = notification.kind === "join";
+  const Icon = isJoin ? Users : BellRing;
+
+  return (
+    <div
+      className={[
+        "pointer-events-auto overflow-hidden rounded-[1.15rem] border px-4 py-3 shadow-[0_18px_45px_rgba(0,0,0,0.38)] backdrop-blur-xl",
+        isJoin
+          ? "border-emerald-300/18 bg-[linear-gradient(135deg,rgba(16,185,129,0.18),rgba(15,23,42,0.92))]"
+          : "border-amber-300/18 bg-[linear-gradient(135deg,rgba(251,191,36,0.18),rgba(15,23,42,0.92))]",
+      ].join(" ")}
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className={[
+            "rounded-full p-2",
+            isJoin ? "bg-emerald-300/14 text-emerald-100" : "bg-amber-300/14 text-amber-100",
+          ].join(" ")}
+        >
+          <Icon className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-white">{notification.title}</p>
+        </div>
+      </div>
+    </div>
   );
 }
 
