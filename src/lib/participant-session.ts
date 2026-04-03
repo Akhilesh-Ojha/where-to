@@ -1,4 +1,4 @@
-const PARTICIPANT_STORAGE_PREFIX = "where-to-participant:";
+const PARTICIPANT_STORAGE_PREFIX = "meetfair-participant:";
 
 function getParticipantStorageKey(planId: string) {
   return `${PARTICIPANT_STORAGE_PREFIX}${planId}`;

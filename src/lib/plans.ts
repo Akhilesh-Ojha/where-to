@@ -120,7 +120,7 @@ function slugify(value: string) {
 
 export function buildPlanId(groupName: string) {
   const slug = slugify(groupName);
-  return slug ? `${slug}-${Math.random().toString(36).slice(2, 6)}` : "where-to-demo";
+  return slug ? `${slug}-${Math.random().toString(36).slice(2, 6)}` : "meetfair-demo";
 }
 
 function createParticipantId(name: string) {

@@ -14,7 +14,7 @@ const displayFont = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Where To",
+  title: "Meetfair",
   description: "Find fair, fast meetup spots for your group.",
 };
 

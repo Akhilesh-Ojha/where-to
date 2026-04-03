@@ -1,4 +1,4 @@
-# Where To
+# Meetfair
 
 A Next.js starter for a group meetup app that helps friends find fair meeting spots fast.
 

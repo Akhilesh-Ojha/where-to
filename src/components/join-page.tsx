@@ -247,7 +247,7 @@ export function JoinPage({ planId }: { planId: string }) {
     <main className="min-h-screen overflow-x-hidden bg-[#09090c] text-white">
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col overflow-x-hidden px-4 py-5">
         <div className="mb-4">
-          <p className="text-[11px] uppercase tracking-[0.38em] text-amber-300/80">Where To</p>
+          <p className="text-[11px] uppercase tracking-[0.38em] text-amber-300/80">Meetfair</p>
           <h1 className="mt-2 max-w-[18rem] break-words text-3xl leading-none">Join {displayPlanName}</h1>
           <p className="mt-2 text-sm text-white/55">Add your name and one accurate location.</p>
         </div>

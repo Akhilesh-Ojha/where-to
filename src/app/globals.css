@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 * {
@@ -9,14 +9,18 @@
 }
 
 html {
+  min-height: 100%;
   scroll-behavior: smooth;
+  background: #09090c;
+  overscroll-behavior-y: none;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100%;
   font-family: var(--font-body), sans-serif;
-  background: #f8fafc;
+  background: #09090c;
+  color: #ffffff;
 }
 
 h1,

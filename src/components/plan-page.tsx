@@ -250,7 +250,7 @@ export function PlanPage({ planId }: { planId: string }) {
     }
     if (navigator.share) {
       await navigator.share({
-        title: `Join ${plan?.groupName || "my plan"} on Where To`,
+        title: `Join ${plan?.groupName || "my plan"} on Meetfair`,
         text: `Join ${plan?.groupName || "our plan"} and add your location.`,
         url: inviteLink,
       });
@@ -303,7 +303,7 @@ export function PlanPage({ planId }: { planId: string }) {
     return (
       <main className="min-h-screen bg-[#09090c] px-4 py-8 text-white">
         <div className="mx-auto max-w-md rounded-[1.8rem] border border-white/10 bg-white/[0.04] p-5">
-          <p className="text-[11px] uppercase tracking-[0.32em] text-white/40">Where To</p>
+          <p className="text-[11px] uppercase tracking-[0.32em] text-white/40">Meetfair</p>
           <h1 className="mt-3 text-3xl">Plan unavailable</h1>
           <p className="mt-3 text-sm leading-7 text-white/55">{error || "This plan could not be loaded."}</p>
           <Link href="/" className="mt-5 inline-flex rounded-full bg-amber-300 px-5 py-3 text-sm font-semibold text-slate-950">
@@ -320,7 +320,7 @@ export function PlanPage({ planId }: { planId: string }) {
         <div className="rounded-[1.8rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))] p-4 shadow-2xl shadow-black/30">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-[11px] uppercase tracking-[0.38em] text-amber-300/80">Where To</p>
+              <p className="text-[11px] uppercase tracking-[0.38em] text-amber-300/80">Meetfair</p>
               <h1 className="mt-2 break-words text-3xl leading-none">{plan.groupName}</h1>
               <p className="mt-2 truncate text-sm text-white/50">
                 {getCategoryLabel(plan.category)}
