@@ -62,6 +62,7 @@ export type PlanRecord = {
   groupName: string;
   category: CategoryId;
   subcategory: string | null;
+  subcategories: string[];
   createdBy: string;
   createdAt: string;
   hostLocation: SavedLocation;
@@ -75,6 +76,7 @@ type PlanRow = {
   group_name: string;
   category: CategoryId;
   subcategory: string | null;
+  subcategories: string[] | null;
   created_by: string;
   created_at: string;
   host_location: SavedLocation;
@@ -195,6 +197,12 @@ function mapPlanRecord(
     groupName: plan.group_name,
     category: plan.category,
     subcategory: plan.subcategory,
+    subcategories:
+      plan.subcategories && plan.subcategories.length > 0
+        ? plan.subcategories
+        : plan.subcategory
+          ? [plan.subcategory]
+          : [],
     createdBy: plan.created_by,
     createdAt: plan.created_at,
     hostLocation: plan.host_location,
@@ -231,6 +239,7 @@ export async function createPlan(input: {
   groupName: string;
   category: CategoryId;
   subcategory?: string | null;
+  subcategories?: string[];
   createdBy: string;
   hostLocation: SavedLocation;
 }) {
@@ -250,6 +259,7 @@ export async function createPlan(input: {
     group_name: input.groupName,
     category: input.category,
     subcategory: input.subcategory || null,
+    subcategories: input.subcategories || (input.subcategory ? [input.subcategory] : []),
     created_by: input.createdBy,
     created_at: createdAt,
     host_location: input.hostLocation,
@@ -278,6 +288,7 @@ export async function createPlan(input: {
     groupName: input.groupName,
     category: input.category,
     subcategory: input.subcategory || null,
+    subcategories: input.subcategories || (input.subcategory ? [input.subcategory] : []),
     createdBy: input.createdBy,
     createdAt,
     hostLocation: input.hostLocation,
@@ -294,7 +305,7 @@ export async function getPlan(planId: string) {
 
   const { data: plan, error: planError } = await supabase
     .from("plans")
-    .select("id, group_name, category, subcategory, created_by, created_at, host_location")
+    .select("id, group_name, category, subcategory, subcategories, created_by, created_at, host_location")
     .eq("id", planId)
     .maybeSingle();
 

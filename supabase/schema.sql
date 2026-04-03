@@ -3,13 +3,15 @@ create table if not exists public.plans (
   group_name text not null,
   category text not null,
   subcategory text,
+  subcategories jsonb not null default '[]'::jsonb,
   created_by text not null,
   created_at timestamptz not null default now(),
   host_location jsonb not null
 );
 
 alter table public.plans
-  add column if not exists subcategory text;
+  add column if not exists subcategory text,
+  add column if not exists subcategories jsonb not null default '[]'::jsonb;
 
 create table if not exists public.participants (
   id text primary key,

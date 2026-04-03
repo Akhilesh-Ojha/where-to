@@ -331,7 +331,14 @@ export function PlanPage({ planId }: { planId: string }) {
               <h1 className="mt-2 break-words text-3xl leading-none">{plan.groupName}</h1>
               <p className="mt-2 truncate text-sm text-white/50">
                 {getCategoryLabel(plan.category)}
-                {plan.subcategory ? ` · ${getCategoryFilterLabel(plan.category, plan.subcategory)}` : ""}
+                {plan.subcategories.length > 0
+                  ? ` · ${plan.subcategories
+                      .map((subcategory) => getCategoryFilterLabel(plan.category, subcategory))
+                      .filter(Boolean)
+                      .join(", ")}`
+                  : plan.subcategory
+                    ? ` · ${getCategoryFilterLabel(plan.category, plan.subcategory)}`
+                    : ""}
                 {" · "}
                 {plan.id}
               </p>
@@ -357,9 +364,14 @@ export function PlanPage({ planId }: { planId: string }) {
             <Stat
               label="Category"
               value={
-                plan.subcategory
-                  ? `${getCategoryLabel(plan.category)} / ${getCategoryFilterLabel(plan.category, plan.subcategory) || ""}`
-                  : getCategoryLabel(plan.category)
+                plan.subcategories.length > 0
+                  ? `${getCategoryLabel(plan.category)} / ${plan.subcategories
+                      .map((subcategory) => getCategoryFilterLabel(plan.category, subcategory))
+                      .filter(Boolean)
+                      .join(", ")}`
+                  : plan.subcategory
+                    ? `${getCategoryLabel(plan.category)} / ${getCategoryFilterLabel(plan.category, plan.subcategory) || ""}`
+                    : getCategoryLabel(plan.category)
               }
             />
           </div>

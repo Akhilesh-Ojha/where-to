@@ -38,6 +38,7 @@ export type GoogleSuggestion = {
   rating: number | null;
   userRatingCount: number | null;
   photoUrls: string[];
+  photoNames: string[];
 };
 
 const DEFAULT_AUTOCOMPLETE_DAILY_LIMIT = 300;
@@ -104,6 +105,10 @@ function mapGooglePlace(place: GooglePlace): GoogleSuggestion | null {
     rating: typeof place.rating === "number" ? place.rating : null,
     userRatingCount: typeof place.userRatingCount === "number" ? place.userRatingCount : null,
     photoUrls: [],
+    photoNames: (place.photos || [])
+      .map((photo) => photo.name)
+      .filter((value): value is string => Boolean(value))
+      .slice(0, 5),
   };
 }
 
@@ -184,21 +189,15 @@ async function fetchPhotoUri(photoName: string, maxWidthPx = 800) {
   return payload.photoUri || null;
 }
 
-async function attachPhotoUrls(places: GooglePlace[], suggestions: GoogleSuggestion[]) {
+export async function hydrateSuggestionPhotos(suggestions: GoogleSuggestion[]) {
   return Promise.all(
     suggestions.map(async (suggestion) => {
-      const sourcePlace = places.find((place) => place.id === suggestion.placeId);
-      const photoNames = (sourcePlace?.photos || [])
-        .map((photo) => photo.name)
-        .filter((value): value is string => Boolean(value))
-        .slice(0, 5);
-
-      if (photoNames.length === 0) {
+      if (suggestion.photoNames.length === 0) {
         return suggestion;
       }
 
       const photoUrls = (
-        await Promise.all(photoNames.map((photoName) => fetchPhotoUri(photoName)))
+        await Promise.all(suggestion.photoNames.map((photoName) => fetchPhotoUri(photoName)))
       ).filter((value): value is string => Boolean(value));
 
       return {
@@ -221,6 +220,55 @@ function offsetCoordinates(
     lat: center.lat + latDelta,
     lng: center.lng + lngDelta,
   };
+}
+
+function dedupeSearchQueries(queries: string[]) {
+  const seen = new Set<string>();
+  const unique: string[] = [];
+
+  for (const query of queries) {
+    const normalized = query.trim().toLowerCase();
+
+    if (!normalized || seen.has(normalized)) {
+      continue;
+    }
+
+    seen.add(normalized);
+    unique.push(query);
+  }
+
+  return unique;
+}
+
+function getNearbySearchQueries(
+  category: CategoryId,
+  subcategory?: string | null,
+  subcategories: string[] = [],
+) {
+  if (subcategories.length > 0) {
+    return dedupeSearchQueries(
+      subcategories.map((selectedSubcategory) =>
+        buildCategorySearchText(category, selectedSubcategory),
+      ),
+    );
+  }
+
+  if (subcategory) {
+    return [buildCategorySearchText(category, subcategory)];
+  }
+
+  switch (category) {
+    case "pub":
+      return dedupeSearchQueries(["pub", "bar", "brewery"]);
+    case "cafe":
+      return dedupeSearchQueries(["cafe", "coffee shop", "bakery"]);
+    case "restaurant":
+      return dedupeSearchQueries(["restaurant", "dine in restaurant"]);
+    case "events":
+      return dedupeSearchQueries(["event venue", "activity center", "live music venue"]);
+    default:
+      return [buildCategorySearchText(category, subcategory)];
+  }
 }
 
 async function fetchNearbySearchSlice(input: {
@@ -332,10 +380,15 @@ export async function searchNearbyPlaces(input: {
   lng: number;
   category: CategoryId;
   subcategory?: string | null;
+  subcategories?: string[];
   limit?: number;
 }) {
   const desiredLimit = input.limit ?? 30;
-  const query = buildCategorySearchText(input.category, input.subcategory);
+  const queries = getNearbySearchQueries(
+    input.category,
+    input.subcategory,
+    input.subcategories || [],
+  );
   const center = { lat: input.lat, lng: input.lng };
   const searchCenters = [
     center,
@@ -344,24 +397,25 @@ export async function searchNearbyPlaces(input: {
     offsetCoordinates(center, 0, 2.2),
     offsetCoordinates(center, 0, -2.2),
   ];
+  const perSliceLimit = queries.length > 1 ? 6 : 10;
 
   const responses = await Promise.all(
-    searchCenters.map((searchCenter) =>
-      fetchNearbySearchSlice({
-        lat: searchCenter.lat,
-        lng: searchCenter.lng,
-        query,
-        limit: 10,
-        radiusMeters: DEFAULT_NEARBY_SEARCH_RADIUS_METERS,
-      }),
+    queries.flatMap((query) =>
+      searchCenters.map((searchCenter) =>
+        fetchNearbySearchSlice({
+          lat: searchCenter.lat,
+          lng: searchCenter.lng,
+          query,
+          limit: perSliceLimit,
+          radiusMeters: DEFAULT_NEARBY_SEARCH_RADIUS_METERS,
+        }),
+      ),
     ),
   );
 
   const allPlaces = responses.flatMap((response) => response.places || []);
-  const suggestions = dedupeSuggestions(
+  return dedupeSuggestions(
     allPlaces.map(mapGooglePlace).filter(isGoogleSuggestion),
     desiredLimit,
   );
-
-  return attachPhotoUrls(allPlaces, suggestions);
 }

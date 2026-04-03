@@ -5,12 +5,17 @@ import {
   rankPlaces,
   type SuggestedPlace,
 } from "@/lib/destinations";
-import { searchNearbyPlaces } from "@/lib/google-places";
+import {
+  hydrateSuggestionPhotos,
+  searchNearbyPlaces,
+  type GoogleSuggestion,
+} from "@/lib/google-places";
 import { getPlan, savePlanDestinations } from "@/lib/plans";
 import { consumeShortWindowRateLimit, getRequestIpAddress } from "@/lib/rate-limit";
 
 const LOCAL_MEETUP_MAX_DISTANCE_KM = 80;
 const LOCAL_CLUSTER_RADIUS_KM = 40;
+const DEFAULT_RAW_LIMIT = 30;
 
 export async function POST(
   request: NextRequest,
@@ -76,7 +81,8 @@ export async function POST(
       lng: center.lng,
       category: plan.category,
       subcategory: plan.subcategory,
-      limit: 30,
+      subcategories: plan.subcategories,
+      limit: DEFAULT_RAW_LIMIT,
     });
 
     const places: SuggestedPlace[] = results.map((place) => ({
@@ -91,7 +97,20 @@ export async function POST(
       photoUrls: place.photoUrls,
     }));
 
-    const destinations = rankPlaces(places, activeParticipants);
+    const rankedDestinations = rankPlaces(places, activeParticipants);
+    const rankedSuggestions = rankedDestinations
+      .map((destination) => {
+        return results.find((result) => result.placeId === destination.placeId) || null;
+      })
+      .filter((result): result is GoogleSuggestion => Boolean(result));
+    const hydratedSuggestions = await hydrateSuggestionPhotos(rankedSuggestions);
+    const hydratedPhotoUrls = new Map(
+      hydratedSuggestions.map((suggestion) => [suggestion.placeId, suggestion.photoUrls]),
+    );
+    const destinations = rankedDestinations.map((destination) => ({
+      ...destination,
+      photoUrls: hydratedPhotoUrls.get(destination.placeId) || [],
+    }));
     const updatedPlan = await savePlanDestinations(id, destinations);
 
     const message =

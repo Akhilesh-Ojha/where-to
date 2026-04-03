@@ -8,6 +8,7 @@ export async function POST(request: NextRequest) {
     lng?: number;
     category?: CategoryId;
     subcategory?: string | null;
+    subcategories?: string[];
   };
 
   if (typeof body.lat !== "number" || typeof body.lng !== "number") {
@@ -19,7 +20,8 @@ export async function POST(request: NextRequest) {
       lat: body.lat,
       lng: body.lng,
       category: body.category || "restaurant",
-      subcategory: body.subcategory || null,
+      subcategory: body.subcategories?.[0] || body.subcategory || null,
+      subcategories: body.subcategories?.slice(0, 3) || (body.subcategory ? [body.subcategory] : []),
       limit: 10,
     });
 

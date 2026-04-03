@@ -52,6 +52,13 @@ type LocationSelection =
       placeId: string;
     };
 
+type HomeFormState = {
+  hostName: string;
+  groupName: string;
+  category: CategoryId;
+  subcategories: string[];
+};
+
 const categories: CategoryOption[] = [
   { id: "restaurant", label: "Restaurant", icon: UtensilsCrossed, glow: "from-orange-300/30 to-rose-400/20" },
   { id: "pub", label: "Nightlife", icon: Martini, glow: "from-amber-300/30 to-rose-400/20" },
@@ -63,11 +70,15 @@ const categories: CategoryOption[] = [
   { id: "events", label: "Activities", icon: Sparkles, glow: "from-fuchsia-300/30 to-violet-400/20" },
 ];
 
-const initialForm = {
+function getDefaultSubcategory(categoryId: CategoryId) {
+  return getCategoryDefinition(categoryId).filters[0]?.id ?? null;
+}
+
+const initialForm: HomeFormState = {
   hostName: "",
   groupName: "",
   category: "restaurant" as CategoryId,
-  subcategory: null as string | null,
+  subcategories: getDefaultSubcategory("restaurant") ? [getDefaultSubcategory("restaurant") as string] : [],
 };
 
 function useDebouncedValue<T>(value: T, delayMs: number) {
@@ -82,7 +93,7 @@ function useDebouncedValue<T>(value: T, delayMs: number) {
 }
 
 export function HomePage() {
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState<HomeFormState>(initialForm);
   const [location, setLocation] = useState<LocationSelection | null>(null);
   const [locationError, setLocationError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -96,6 +107,7 @@ export function HomePage() {
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 350);
   const router = useRouter();
   const selectedCategory = getCategoryDefinition(form.category);
+  const selectedSubcategories = form.subcategories || [];
 
   const canCreate = Boolean(form.hostName.trim() && form.groupName.trim() && location);
   const createDisabled = !canCreate || creatingPlan || redirectingToHost;
@@ -179,13 +191,13 @@ export function HomePage() {
       const response = await fetch("/api/plans", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          groupName: form.groupName.trim(),
-          category: form.category,
-          subcategory: form.subcategory,
-          createdBy: form.hostName.trim(),
-          hostLocation: location as SavedLocation,
-        }),
+          body: JSON.stringify({
+            groupName: form.groupName.trim(),
+            category: form.category,
+            subcategories: selectedSubcategories,
+            createdBy: form.hostName.trim(),
+            hostLocation: location as SavedLocation,
+          }),
       });
 
       const payload = (await response.json()) as
@@ -297,7 +309,9 @@ export function HomePage() {
                           setForm((current) => ({
                             ...current,
                             category: category.id,
-                            subcategory: null,
+                            subcategories: getDefaultSubcategory(category.id)
+                              ? [getDefaultSubcategory(category.id) as string]
+                              : [],
                           }))
                         }
                         className={[
@@ -327,29 +341,45 @@ export function HomePage() {
                     <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/45">
                       Filter
                     </p>
-                    <p className="text-[11px] text-white/35">Optional</p>
+                    <p className="text-[11px] text-white/35">Pick up to 3</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setForm((current) => ({ ...current, subcategory: null }))}
-                      className={[
-                        "rounded-full border px-2 py-0.5 text-[6px] font-semibold tracking-[0.04em] transition",
-                        form.subcategory === null
-                          ? "border-amber-200/85 bg-[linear-gradient(135deg,rgba(251,191,36,0.26),rgba(245,158,11,0.12))] text-amber-50 shadow-[0_0_0_1px_rgba(253,230,138,0.35),0_10px_24px_rgba(245,158,11,0.18)]"
-                          : "border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] text-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/15 hover:bg-white/[0.05] hover:text-white/82",
-                      ].join(" ")}
-                    >
-                      All {selectedCategory.summaryLabel}
-                    </button>
                     {selectedCategory.filters.map((filter) => (
                       <button
                         key={filter.id}
                         type="button"
-                        onClick={() => setForm((current) => ({ ...current, subcategory: filter.id }))}
+                        onClick={() =>
+                          setForm((current) => {
+                            const currentSubcategories = current.subcategories || [];
+                            const isSelected = currentSubcategories.includes(filter.id);
+
+                            if (isSelected) {
+                              const nextSubcategories = currentSubcategories.filter(
+                                (selectedFilterId) => selectedFilterId !== filter.id,
+                              );
+
+                              return {
+                                ...current,
+                                subcategories:
+                                  nextSubcategories.length > 0
+                                    ? nextSubcategories
+                                    : [selectedCategory.filters[0]?.id || filter.id],
+                              };
+                            }
+
+                            if (currentSubcategories.length >= 3) {
+                              return current;
+                            }
+
+                            return {
+                              ...current,
+                              subcategories: [...currentSubcategories, filter.id],
+                            };
+                          })
+                        }
                         className={[
                           "rounded-full border px-2 py-0.5 text-[6px] font-semibold tracking-[0.04em] transition",
-                          form.subcategory === filter.id
+                          selectedSubcategories.includes(filter.id)
                             ? "border-amber-200/85 bg-[linear-gradient(135deg,rgba(251,191,36,0.26),rgba(245,158,11,0.12))] text-amber-50 shadow-[0_0_0_1px_rgba(253,230,138,0.35),0_10px_24px_rgba(245,158,11,0.18)]"
                             : "border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] text-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/15 hover:bg-white/[0.05] hover:text-white/82",
                         ].join(" ")}

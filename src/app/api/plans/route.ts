@@ -8,6 +8,7 @@ export async function POST(request: NextRequest) {
       groupName?: string;
       category?: CategoryId;
       subcategory?: string | null;
+      subcategories?: string[];
       createdBy?: string;
       hostLocation?: SavedLocation;
     };
@@ -22,7 +23,8 @@ export async function POST(request: NextRequest) {
     const result = await createPlan({
       groupName: body.groupName.trim(),
       category: body.category,
-      subcategory: body.subcategory || null,
+      subcategory: body.subcategories?.[0] || body.subcategory || null,
+      subcategories: body.subcategories?.slice(0, 3) || (body.subcategory ? [body.subcategory] : []),
       createdBy: body.createdBy.trim(),
       hostLocation: body.hostLocation,
     });
