@@ -39,6 +39,29 @@ export function haversineDistanceKm(
   return 2 * earthRadiusKm * Math.asin(Math.sqrt(a));
 }
 
+export function getMaxParticipantDistanceKm(participants: ParticipantRecord[]) {
+  let maxDistanceKm = 0;
+
+  for (let index = 0; index < participants.length; index += 1) {
+    for (let compareIndex = index + 1; compareIndex < participants.length; compareIndex += 1) {
+      const distanceKm = haversineDistanceKm(
+        {
+          lat: participants[index].location.lat,
+          lng: participants[index].location.lng,
+        },
+        {
+          lat: participants[compareIndex].location.lat,
+          lng: participants[compareIndex].location.lng,
+        },
+      );
+
+      maxDistanceKm = Math.max(maxDistanceKm, distanceKm);
+    }
+  }
+
+  return maxDistanceKm;
+}
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { rankPlaces, type SuggestedPlace } from "@/lib/destinations";
+import { getMaxParticipantDistanceKm, rankPlaces, type SuggestedPlace } from "@/lib/destinations";
 import { searchNearbyPlaces } from "@/lib/google-places";
 import { getPlan, savePlanDestinations } from "@/lib/plans";
 import { consumeShortWindowRateLimit, getRequestIpAddress } from "@/lib/rate-limit";
+
+const LOCAL_MEETUP_MAX_DISTANCE_KM = 80;
 
 export async function POST(
   request: NextRequest,
@@ -24,6 +26,18 @@ export async function POST(
     if (plan.participants.length < 2) {
       return NextResponse.json(
         { error: "At least two participants are required before finding destinations." },
+        { status: 400 },
+      );
+    }
+
+    const maxParticipantDistanceKm = getMaxParticipantDistanceKm(plan.participants);
+
+    if (maxParticipantDistanceKm > LOCAL_MEETUP_MAX_DISTANCE_KM) {
+      return NextResponse.json(
+        {
+          error:
+            "This group is spread too far apart for a local meetup right now. Long-distance meetups are coming soon.",
+        },
         { status: 400 },
       );
     }
