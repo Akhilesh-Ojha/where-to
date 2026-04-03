@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getMaxParticipantDistanceKm, rankPlaces, type SuggestedPlace } from "@/lib/destinations";
+import {
+  findLocalMeetupCluster,
+  getMaxParticipantDistanceKm,
+  rankPlaces,
+  type SuggestedPlace,
+} from "@/lib/destinations";
 import { searchNearbyPlaces } from "@/lib/google-places";
 import { getPlan, savePlanDestinations } from "@/lib/plans";
 import { consumeShortWindowRateLimit, getRequestIpAddress } from "@/lib/rate-limit";
 
 const LOCAL_MEETUP_MAX_DISTANCE_KM = 80;
+const LOCAL_CLUSTER_RADIUS_KM = 40;
 
 export async function POST(
   request: NextRequest,
@@ -31,8 +37,19 @@ export async function POST(
     }
 
     const maxParticipantDistanceKm = getMaxParticipantDistanceKm(plan.participants);
+    const { cluster, excluded } = findLocalMeetupCluster(
+      plan.participants,
+      LOCAL_CLUSTER_RADIUS_KM,
+    );
+    const requiredClusterSize =
+      plan.participants.length <= 3
+        ? plan.participants.length
+        : Math.max(plan.participants.length - 1, Math.ceil(plan.participants.length * 0.7));
 
-    if (maxParticipantDistanceKm > LOCAL_MEETUP_MAX_DISTANCE_KM) {
+    if (
+      maxParticipantDistanceKm > LOCAL_MEETUP_MAX_DISTANCE_KM &&
+      cluster.length < requiredClusterSize
+    ) {
       return NextResponse.json(
         {
           error:
@@ -42,18 +59,16 @@ export async function POST(
       );
     }
 
-    const midpoint = plan.participants.reduce(
-      (sum, participant) => {
-        sum.lat += participant.location.lat;
-        sum.lng += participant.location.lng;
-        return sum;
-      },
-      { lat: 0, lng: 0 },
-    );
+    const activeParticipants =
+      excluded.length > 0 && cluster.length >= requiredClusterSize ? cluster : plan.participants;
 
     const center = {
-      lat: midpoint.lat / plan.participants.length,
-      lng: midpoint.lng / plan.participants.length,
+      lat:
+        activeParticipants.reduce((sum, participant) => sum + participant.location.lat, 0) /
+        activeParticipants.length,
+      lng:
+        activeParticipants.reduce((sum, participant) => sum + participant.location.lng, 0) /
+        activeParticipants.length,
     };
 
     const results = await searchNearbyPlaces({
@@ -76,10 +91,15 @@ export async function POST(
       photoUrls: place.photoUrls,
     }));
 
-    const destinations = rankPlaces(places, plan.participants);
+    const destinations = rankPlaces(places, activeParticipants);
     const updatedPlan = await savePlanDestinations(id, destinations);
 
-    return NextResponse.json({ plan: updatedPlan, destinations });
+    const message =
+      activeParticipants.length !== plan.participants.length
+        ? `${excluded.length} participant${excluded.length > 1 ? "s are" : " is"} much farther than the main group, so results are optimized for the local cluster.`
+        : undefined;
+
+    return NextResponse.json({ plan: updatedPlan, destinations, message });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to fetch nearby destinations.";

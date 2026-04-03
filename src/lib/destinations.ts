@@ -62,6 +62,39 @@ export function getMaxParticipantDistanceKm(participants: ParticipantRecord[]) {
   return maxDistanceKm;
 }
 
+export function findLocalMeetupCluster(
+  participants: ParticipantRecord[],
+  clusterRadiusKm = 40,
+) {
+  if (participants.length <= 1) {
+    return { cluster: participants, excluded: [] as ParticipantRecord[] };
+  }
+
+  let bestCluster: ParticipantRecord[] = [];
+
+  for (const anchor of participants) {
+    const cluster = participants.filter((participant) => {
+      return (
+        haversineDistanceKm(
+          { lat: anchor.location.lat, lng: anchor.location.lng },
+          { lat: participant.location.lat, lng: participant.location.lng },
+        ) <= clusterRadiusKm
+      );
+    });
+
+    if (cluster.length > bestCluster.length) {
+      bestCluster = cluster;
+    }
+  }
+
+  const clusterIds = new Set(bestCluster.map((participant) => participant.id));
+
+  return {
+    cluster: bestCluster,
+    excluded: participants.filter((participant) => !clusterIds.has(participant.id)),
+  };
+}
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }

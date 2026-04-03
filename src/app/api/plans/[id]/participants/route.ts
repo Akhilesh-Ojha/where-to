@@ -27,9 +27,16 @@ export async function POST(
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Could not join this plan right now.";
+    const status =
+      message.includes("nearby meetups only") || message.includes("Long-distance meetup mode")
+        ? 400
+        : 500;
+
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Could not join this plan right now." },
-      { status: 500 },
+      { error: message },
+      { status },
     );
   }
 }

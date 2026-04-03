@@ -30,7 +30,13 @@ export async function POST(request: NextRequest) {
       limit: 10,
     });
 
-    return NextResponse.json({ suggestions });
+    return NextResponse.json({
+      suggestions,
+      message:
+        suggestions.length === 0
+          ? "Pick a specific landmark, area, or address instead of a whole city."
+          : undefined,
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to reach Google Places text search.";

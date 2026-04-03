@@ -2,6 +2,7 @@ import { getSupabaseAdmin } from "@/lib/supabase-server";
 import type { CategoryId } from "@/lib/categories";
 
 const PLAN_TTL_HOURS = 24;
+const LOCAL_MEETUP_MAX_DISTANCE_KM = 80;
 
 export type SavedLocation =
   | {
@@ -126,6 +127,47 @@ export function buildPlanId(groupName: string) {
 function createParticipantId(name: string) {
   const slug = slugify(name);
   return `${slug || "guest"}-${Math.random().toString(36).slice(2, 6)}`;
+}
+
+function haversineDistanceKm(
+  from: { lat: number; lng: number },
+  to: { lat: number; lng: number },
+) {
+  const toRadians = (value: number) => (value * Math.PI) / 180;
+  const earthRadiusKm = 6371;
+  const dLat = toRadians(to.lat - from.lat);
+  const dLng = toRadians(to.lng - from.lng);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(from.lat)) *
+      Math.cos(toRadians(to.lat)) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+
+  return 2 * earthRadiusKm * Math.asin(Math.sqrt(a));
+}
+
+function getMaxParticipantDistanceKm(participants: ParticipantRecord[]) {
+  let maxDistanceKm = 0;
+
+  for (let index = 0; index < participants.length; index += 1) {
+    for (let compareIndex = index + 1; compareIndex < participants.length; compareIndex += 1) {
+      const distanceKm = haversineDistanceKm(
+        {
+          lat: participants[index].location.lat,
+          lng: participants[index].location.lng,
+        },
+        {
+          lat: participants[compareIndex].location.lat,
+          lng: participants[compareIndex].location.lng,
+        },
+      );
+
+      maxDistanceKm = Math.max(maxDistanceKm, distanceKm);
+    }
+  }
+
+  return maxDistanceKm;
 }
 
 function getPlanExpiryCutoffIso() {
@@ -334,6 +376,14 @@ export async function addParticipantToPlan(
     joinedAt: new Date().toISOString(),
     location: input.location,
   };
+
+  const candidateGroup = [...plan.participants, participant];
+
+  if (getMaxParticipantDistanceKm(candidateGroup) > LOCAL_MEETUP_MAX_DISTANCE_KM) {
+    throw new Error(
+      "This plan is currently for nearby meetups only. Long-distance meetup mode is coming soon.",
+    );
+  }
 
   const { error } = await supabase.from("participants").insert({
     id: participant.id,

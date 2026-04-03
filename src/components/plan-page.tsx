@@ -25,6 +25,7 @@ export function PlanPage({ planId }: { planId: string }) {
   const [copied, setCopied] = useState(false);
   const [placesLoading, setPlacesLoading] = useState(false);
   const [placesError, setPlacesError] = useState("");
+  const [placesNotice, setPlacesNotice] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [sortBy, setSortBy] = useState<"fairness" | "rating">("fairness");
   const [voteSavingPlaceId, setVoteSavingPlaceId] = useState<string | null>(null);
@@ -221,14 +222,18 @@ export function PlanPage({ planId }: { planId: string }) {
     try {
       setPlacesLoading(true);
       setPlacesError("");
+      setPlacesNotice("");
       setHasSearched(true);
       const response = await fetch(`/api/plans/${planId}/destinations`, { method: "POST" });
-      const payload = (await response.json()) as { plan?: PlanRecord; error?: string } | undefined;
+      const payload = (await response.json()) as
+        | { plan?: PlanRecord; error?: string; message?: string }
+        | undefined;
       if (!response.ok || !payload?.plan) {
         setPlacesError(payload?.error || "Could not find destinations right now.");
         return;
       }
       setPlan(payload.plan);
+      setPlacesNotice(payload?.message || "");
     } catch {
       setPlacesError("Could not find destinations right now.");
     } finally {
@@ -432,6 +437,11 @@ export function PlanPage({ planId }: { planId: string }) {
           {plan.participants.length < 2 ? (
             <div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-3 text-sm text-white/50">
               Need at least 2 people before searching.
+            </div>
+          ) : null}
+          {placesNotice ? (
+            <div className="mt-3 rounded-2xl border border-amber-300/15 bg-amber-300/8 px-3 py-3 text-sm text-amber-50/85">
+              {placesNotice}
             </div>
           ) : null}
           {placesError ? <p className="mt-3 text-sm text-rose-300">{placesError}</p> : null}

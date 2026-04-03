@@ -42,6 +42,16 @@ export type GoogleSuggestion = {
 
 const DEFAULT_AUTOCOMPLETE_DAILY_LIMIT = 300;
 const DEFAULT_NEARBY_DAILY_LIMIT = 150;
+const BROAD_LOCATION_TYPES = new Set([
+  "locality",
+  "sublocality",
+  "postal_town",
+  "administrative_area_level_1",
+  "administrative_area_level_2",
+  "administrative_area_level_3",
+  "country",
+  "postal_code",
+]);
 
 function getApiKey() {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
@@ -94,6 +104,34 @@ function mapGooglePlace(place: GooglePlace): GoogleSuggestion | null {
     userRatingCount: typeof place.userRatingCount === "number" ? place.userRatingCount : null,
     photoUrls: [],
   };
+}
+
+function isSpecificMeetupSuggestion(suggestion: GoogleSuggestion) {
+  if (BROAD_LOCATION_TYPES.has(suggestion.type)) {
+    return false;
+  }
+
+  const label = suggestion.text.trim().toLowerCase();
+  const address = suggestion.secondaryText.trim().toLowerCase();
+
+  if (!address) {
+    return false;
+  }
+
+  if (label === address) {
+    return false;
+  }
+
+  const addressParts = address
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (addressParts.length <= 2 && !label.includes(" ") && !label.includes("-")) {
+    return false;
+  }
+
+  return true;
 }
 
 function dedupeSuggestions(suggestions: GoogleSuggestion[], limit: number) {
@@ -213,7 +251,10 @@ export async function searchPlacesByText(input: {
 
   const data = (await response.json()) as GoogleTextSearchResponse;
   return dedupeSuggestions(
-    (data.places || []).map(mapGooglePlace).filter(Boolean) as GoogleSuggestion[],
+    (data.places || [])
+      .map(mapGooglePlace)
+      .filter(Boolean)
+      .filter(isSpecificMeetupSuggestion) as GoogleSuggestion[],
     input.limit ?? 10,
   );
 }
