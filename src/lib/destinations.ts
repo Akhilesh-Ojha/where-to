@@ -161,7 +161,14 @@ export function rankPlaces(
         0,
         100,
       );
-      const balanceScore = clamp(
+      const fairness = Math.round(
+        clamp(
+          100 - (fairnessGapKm / Math.max(1, averageDistanceKm)) * 100,
+          0,
+          100,
+        ),
+      );
+      const fitScore = clamp(
         100 - (adjustedFairnessGapKm / targetFairnessGapKm) * 100,
         0,
         100,
@@ -171,9 +178,9 @@ export function rankPlaces(
         0,
         100,
       );
-      const fairness = Math.round(
+      const overallFit = Math.round(
         clamp(
-          closenessScore * closenessWeight + balanceScore * fairnessWeight - extremeTravelPenalty,
+          closenessScore * closenessWeight + fitScore * fairnessWeight - extremeTravelPenalty,
           0,
           100,
         ),
@@ -182,6 +189,7 @@ export function rankPlaces(
       return {
         ...place,
         fairness,
+        overallFit,
         averageDistanceKm,
         distances,
         photoUrls: place.photoUrls,
@@ -189,6 +197,10 @@ export function rankPlaces(
       };
     })
     .sort((left, right) => {
+      if (right.overallFit !== left.overallFit) {
+        return right.overallFit - left.overallFit;
+      }
+
       if (right.fairness !== left.fairness) {
         return right.fairness - left.fairness;
       }
@@ -199,5 +211,6 @@ export function rankPlaces(
 
       return left.averageDistanceKm - right.averageDistanceKm;
     })
+    .map(({ overallFit: _overallFit, ...place }) => place)
     .slice(0, 10);
 }
