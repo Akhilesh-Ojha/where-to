@@ -59,6 +59,12 @@ type HomeFormState = {
   subcategories: string[];
 };
 
+type PermissionAwareNavigator = Navigator & {
+  permissions?: {
+    query: (descriptor: { name: "geolocation" }) => Promise<{ state: "granted" | "denied" | "prompt" }>;
+  };
+};
+
 const categories: CategoryOption[] = [
   { id: "restaurant", label: "Restaurant", icon: UtensilsCrossed, glow: "from-orange-300/30 to-rose-400/20" },
   { id: "pub", label: "Nightlife", icon: Martini, glow: "from-amber-300/30 to-rose-400/20" },
@@ -72,6 +78,26 @@ const categories: CategoryOption[] = [
 
 function getDefaultSubcategory(categoryId: CategoryId) {
   return getCategoryDefinition(categoryId).filters[0]?.id ?? null;
+}
+
+function getLocationHelpMessage() {
+  return "Allow location in your browser's site settings, then try Use mine again. If needed, also enable Location Services for your browser or device. You can always search manually instead.";
+}
+
+function getGeolocationErrorMessage(error?: { code?: number }) {
+  if (error?.code === 1) {
+    return `Location access is blocked. ${getLocationHelpMessage()}`;
+  }
+
+  if (error?.code === 2) {
+    return "Your location couldn’t be determined right now. Check your signal and try again, or search manually instead.";
+  }
+
+  if (error?.code === 3) {
+    return "Location took too long to respond. Try again, or search manually instead.";
+  }
+
+  return "Couldn’t get your precise location. Search manually instead.";
 }
 
 const initialForm: HomeFormState = {
@@ -222,7 +248,7 @@ export function HomePage() {
     }
   }
 
-  function handleUseCurrentLocation() {
+  async function handleUseCurrentLocation() {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setLocationError("Location access is not supported on this device.");
       return;
@@ -230,6 +256,20 @@ export function HomePage() {
 
     setLocationError("");
     setManualSelectionLocked(false);
+
+    try {
+      const permissionNavigator = navigator as PermissionAwareNavigator;
+      const permissionState = await permissionNavigator.permissions?.query({
+        name: "geolocation",
+      });
+
+      if (permissionState?.state === "denied") {
+        setLocationError(`Location access is blocked. ${getLocationHelpMessage()}`);
+        return;
+      }
+    } catch {
+      // Ignore permission preflight failures and let the browser handle the prompt.
+    }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -241,7 +281,7 @@ export function HomePage() {
           lng: position.coords.longitude,
         });
       },
-      () => setLocationError("Couldn’t get your precise location. Pick a place manually instead."),
+      (error) => setLocationError(getGeolocationErrorMessage(error)),
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   }
@@ -326,7 +366,12 @@ export function HomePage() {
                         <div className="relative flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
                             <Icon className={active ? "h-4 w-4 text-amber-100" : "h-4 w-4"} />
-                            <span className={active ? "text-xs font-semibold text-white" : "text-xs font-semibold"}>{category.label}</span>
+                            <span
+                              className={["text-xs font-semibold", active ? "text-white" : ""].join(" ")}
+                              style={{ fontFamily: "var(--font-body), sans-serif" }}
+                            >
+                              {category.label}
+                            </span>
                           </div>
                         </div>
                       </button>
@@ -378,13 +423,18 @@ export function HomePage() {
                           })
                         }
                         className={[
-                          "rounded-full border px-2 py-0.5 text-[6px] font-semibold tracking-[0.04em] transition",
+                          "inline-flex items-center justify-center rounded-2xl border px-4 py-1.5 text-xs font-semibold transition",
                           selectedSubcategories.includes(filter.id)
                             ? "border-amber-200/85 bg-[linear-gradient(135deg,rgba(251,191,36,0.26),rgba(245,158,11,0.12))] text-amber-50 shadow-[0_0_0_1px_rgba(253,230,138,0.35),0_10px_24px_rgba(245,158,11,0.18)]"
                             : "border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] text-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/15 hover:bg-white/[0.05] hover:text-white/82",
                         ].join(" ")}
                       >
-                        {filter.label}
+                        <span
+                          className="text-xs font-semibold"
+                          style={{ fontFamily: "var(--font-body), sans-serif" }}
+                        >
+                          {filter.label}
+                        </span>
                       </button>
                     ))}
                   </div>

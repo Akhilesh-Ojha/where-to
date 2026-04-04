@@ -17,6 +17,12 @@ type PlaceSuggestion = {
 
 type LocationSelection = PlanRecord["hostLocation"];
 
+type PermissionAwareNavigator = Navigator & {
+  permissions?: {
+    query: (descriptor: { name: "geolocation" }) => Promise<{ state: "granted" | "denied" | "prompt" }>;
+  };
+};
+
 function useDebouncedValue<T>(value: T, delayMs: number) {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
@@ -35,6 +41,26 @@ function prettifyPlanName(planId: string) {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function getLocationHelpMessage() {
+  return "Allow location in your browser's site settings, then try Use mine again. If needed, also enable Location Services for your browser or device. You can always search manually instead.";
+}
+
+function getGeolocationErrorMessage(error?: { code?: number }) {
+  if (error?.code === 1) {
+    return `Location access is blocked. ${getLocationHelpMessage()}`;
+  }
+
+  if (error?.code === 2) {
+    return "Your location couldn’t be determined right now. Check your signal and try again, or search manually instead.";
+  }
+
+  if (error?.code === 3) {
+    return "Location took too long to respond. Try again, or search manually instead.";
+  }
+
+  return "Couldn’t get your precise location. Pick a place manually instead.";
 }
 
 export function JoinPage({ planId }: { planId: string }) {
@@ -160,7 +186,7 @@ export function JoinPage({ planId }: { planId: string }) {
     return () => controller.abort();
   }, [debouncedSearchQuery]);
 
-  function handleUseCurrentLocation() {
+  async function handleUseCurrentLocation() {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setLocationError("Location access is not supported on this device.");
       return;
@@ -168,6 +194,21 @@ export function JoinPage({ planId }: { planId: string }) {
 
     setLocationError("");
     setManualSelectionLocked(false);
+
+    try {
+      const permissionNavigator = navigator as PermissionAwareNavigator;
+      const permissionState = await permissionNavigator.permissions?.query({
+        name: "geolocation",
+      });
+
+      if (permissionState?.state === "denied") {
+        setLocationError(`Location access is blocked. ${getLocationHelpMessage()}`);
+        return;
+      }
+    } catch {
+      // Ignore permission preflight failures and let the browser handle the prompt.
+    }
+
     navigator.geolocation.getCurrentPosition(
       (position) =>
         setLocation({
@@ -177,7 +218,7 @@ export function JoinPage({ planId }: { planId: string }) {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         }),
-      () => setLocationError("Couldn’t get your precise location. Pick a place manually instead."),
+      (error) => setLocationError(getGeolocationErrorMessage(error)),
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   }
