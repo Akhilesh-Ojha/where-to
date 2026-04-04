@@ -806,17 +806,23 @@ function DecisionModal({
           </button>
         </div>
         {SUPPORT_URL ? (
-          <div className="relative mt-4 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-            <p className="text-xs text-white/60">Enjoyed Meetfair?</p>
-            <a
-              href={SUPPORT_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-amber-200 underline decoration-amber-200/35 underline-offset-4"
-            >
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => window.open(SUPPORT_URL, "_blank", "noopener,noreferrer")}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                window.open(SUPPORT_URL, "_blank", "noopener,noreferrer");
+              }
+            }}
+            className="relative mt-4 cursor-pointer rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"
+          >
+            <p className="text-xs text-white/60">Did Meetfair help your group decide?</p>
+            <div className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-amber-200 underline decoration-amber-200/35 underline-offset-4">
               <Coffee className="h-4 w-4" />
               Buy me a chai
-            </a>
+            </div>
           </div>
         ) : null}
       </div>

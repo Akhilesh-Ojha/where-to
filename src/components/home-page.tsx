@@ -428,6 +428,7 @@ export function HomePage() {
                             ? "border-amber-200/85 bg-[linear-gradient(135deg,rgba(251,191,36,0.26),rgba(245,158,11,0.12))] text-amber-50 shadow-[0_0_0_1px_rgba(253,230,138,0.35),0_10px_24px_rgba(245,158,11,0.18)]"
                             : "border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] text-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/15 hover:bg-white/[0.05] hover:text-white/82",
                         ].join(" ")}
+                        style={{ borderRadius: "12px", padding: "8px 22px" }} 
                       >
                         <span
                           className="text-xs font-semibold"
