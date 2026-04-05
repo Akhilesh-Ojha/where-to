@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
+  AlertTriangle,
   BellRing,
   CheckCircle2,
   Coffee,
@@ -50,6 +51,7 @@ export function PlanPage({ planId }: { planId: string }) {
   const [voteError, setVoteError] = useState("");
   const [decisionPopupOpen, setDecisionPopupOpen] = useState(false);
   const [lastCelebratedDecisionKey, setLastCelebratedDecisionKey] = useState<string | null>(null);
+  const [destinationsConfirmOpen, setDestinationsConfirmOpen] = useState(false);
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
   const [notifications, setNotifications] = useState<InAppNotification[]>([]);
   const previousPlanRef = useRef<PlanRecord | null>(null);
@@ -353,6 +355,14 @@ export function PlanPage({ planId }: { planId: string }) {
     }
   }
 
+  function handleOpenDestinationsConfirm() {
+    if (!plan || plan.participants.length < 2 || placesLoading || plan.destinations.length > 0) {
+      return;
+    }
+
+    setDestinationsConfirmOpen(true);
+  }
+
   async function handleCopy() {
     if (typeof navigator === "undefined" || !navigator.clipboard) {
       return;
@@ -548,7 +558,7 @@ export function PlanPage({ planId }: { planId: string }) {
           </div>
 
           <button
-            onClick={handleFindDestinations}
+            onClick={handleOpenDestinationsConfirm}
             disabled={plan.participants.length < 2 || placesLoading || plan.destinations.length > 0}
             className={[
               "mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-semibold transition",
@@ -646,6 +656,15 @@ export function PlanPage({ planId }: { planId: string }) {
           viewportSize={viewportSize}
         />
       ) : null}
+      {destinationsConfirmOpen ? (
+        <DestinationsConfirmModal
+          onClose={() => setDestinationsConfirmOpen(false)}
+          onConfirm={() => {
+            setDestinationsConfirmOpen(false);
+            void handleFindDestinations();
+          }}
+        />
+      ) : null}
     </main>
   );
 }
@@ -685,6 +704,50 @@ function Stat({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-3">
       <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">{label}</p>
       <p className="mt-1 text-lg font-semibold">{value}</p>
+    </div>
+  );
+}
+
+function DestinationsConfirmModal({
+  onClose,
+  onConfirm,
+}: {
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-sm overflow-hidden rounded-[2rem] border border-amber-200/18 bg-[linear-gradient(180deg,rgba(245,158,11,0.16),rgba(14,14,18,0.97))] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
+        <div className="inline-flex rounded-full bg-amber-300/12 p-2 text-amber-100">
+          <AlertTriangle className="h-5 w-5" />
+        </div>
+        <p className="mt-4 text-[11px] uppercase tracking-[0.32em] text-amber-100/80">
+          Before you continue
+        </p>
+        <h3 className="mt-2 text-2xl font-semibold text-amber-50">
+          Ready to lock the room?
+        </h3>
+        <p className="mt-3 text-sm leading-6 text-amber-50/78">
+          Make sure everyone you want to plan with has already joined. Once destinations are fetched, this room is locked and no one else can join.
+        </p>
+        
+        <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white"
+          >
+            Not yet
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-slate-950"
+          >
+            Find destinations
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
