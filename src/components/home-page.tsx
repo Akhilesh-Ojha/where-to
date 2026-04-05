@@ -7,13 +7,16 @@ import {
   Check,
   Coffee,
   Crosshair,
+  MapPin,
   Martini,
   LoaderCircle,
   ShoppingBag,
   Search,
+  Send,
   Sparkles,
   Volleyball,
   UtensilsCrossed,
+  Vote,
   Waves,
 } from "lucide-react";
 import { getCategoryDefinition, type CategoryId } from "@/lib/categories";
@@ -310,6 +313,23 @@ export function HomePage() {
           <p className="mt-2 max-w-[18rem] text-sm leading-6 text-white/58">
             Find the fairest place to meet.
           </p>
+          <div className="mt-4 w-full rounded-[1.8rem] border border-white/8 bg-white/[0.03] p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/38">
+              How to use?
+            </p>
+            <div className="mt-3 grid gap-2 text-xs text-white/68">
+              <div className="flex flex-wrap items-center gap-2">
+                <HowItWorksStep icon={MapPin} label="Add your location" />
+                <span className="text-white/20">•</span>
+                <HowItWorksStep icon={Send} label="Share with friends" />
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <HowItWorksStep icon={Search} label="Find destinations" />
+                <span className="text-white/20">•</span>
+                <HowItWorksStep icon={Vote} label="Vote together" />
+              </div>
+            </div>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="grid gap-4">
@@ -573,5 +593,20 @@ function InlineNotice({ icon, text }: { icon: ReactNode; text: string }) {
       {icon}
       {text}
     </div>
+  );
+}
+
+function HowItWorksStep({
+  icon: Icon,
+  label,
+}: {
+  icon: typeof MapPin;
+  label: string;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <Icon className="h-3.5 w-3.5 text-amber-200/85" />
+      <span>{label}</span>
+    </span>
   );
 }
