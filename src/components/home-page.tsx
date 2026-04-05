@@ -317,15 +317,12 @@ export function HomePage() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/38">
               How to use?
             </p>
-            <div className="mt-3 grid gap-2 text-xs text-white/68">
-              <div className="flex flex-wrap items-center gap-2">
+            <div className="relative mt-3">
+              <HowItWorksFlow />
+              <div className="relative z-10 grid grid-cols-2 gap-x-8 gap-y-6 text-xs text-white/68">
                 <HowItWorksStep icon={MapPin} label="Add your location" />
-                <span className="text-white/20">•</span>
                 <HowItWorksStep icon={Send} label="Share with friends" />
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
                 <HowItWorksStep icon={Search} label="Find destinations" />
-                <span className="text-white/20">•</span>
                 <HowItWorksStep icon={Vote} label="Vote together" />
               </div>
             </div>
@@ -604,9 +601,42 @@ function HowItWorksStep({
   label: string;
 }) {
   return (
-    <span className="inline-flex items-center gap-1.5">
-      <Icon className="h-3.5 w-3.5 text-amber-200/85" />
-      <span>{label}</span>
-    </span>
+    <div className="flex min-w-0 items-center gap-2">
+      <Icon className="h-3.5 w-3.5 shrink-0 text-amber-200/85" />
+      <span className="truncate leading-none">{label}</span>
+    </div>
+  );
+}
+
+function HowItWorksFlow() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 100 58"
+      preserveAspectRatio="none"
+      className="pointer-events-none absolute inset-0 h-full w-full opacity-55"
+    >
+      <path
+        d="M10 13 H50"
+        fill="none"
+        stroke="rgba(252,211,77,0.34)"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M50 13 C61 13 63 18 63 24 C63 34 48 34 37 34 C24 34 24 44 24 45"
+        fill="none"
+        stroke="rgba(252,211,77,0.34)"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M24 45 H64"
+        fill="none"
+        stroke="rgba(252,211,77,0.34)"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
