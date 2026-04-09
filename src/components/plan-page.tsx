@@ -6,16 +6,28 @@ import {
   AlertTriangle,
   BellRing,
   CheckCircle2,
+  Clapperboard,
   Coffee,
   Copy,
   LoaderCircle,
+  Martini,
+  ShoppingBag,
+  Sparkles,
+  Volleyball,
   Route,
   Share2,
   Star,
+  UtensilsCrossed,
   Users,
+  Waves,
 } from "lucide-react";
 import Confetti from "react-confetti";
-import { getCategoryFilterLabel, getCategoryLabel } from "@/lib/categories";
+import {
+  getCategoryDefinition,
+  getCategoryFilterLabel,
+  getCategoryLabel,
+  type CategoryId,
+} from "@/lib/categories";
 import { buildMapUrl } from "@/lib/destinations";
 import { getStoredParticipantId } from "@/lib/participant-session";
 import type { DestinationRecord, PlanRecord } from "@/lib/plans";
@@ -32,9 +44,41 @@ const SUPPORT_URL = process.env.NEXT_PUBLIC_SUPPORT_URL?.trim() || "";
 
 type InAppNotification = {
   id: string;
-  kind: "join" | "vote";
+  kind: "join" | "vote" | "category";
   title: string;
 };
+
+type CategoryDraft = {
+  category: CategoryId;
+  subcategories: string[];
+};
+
+type CategoryOption = {
+  id: CategoryId;
+  label: string;
+  icon: typeof Martini;
+  glow: string;
+};
+
+const categoryOptions: CategoryOption[] = [
+  { id: "restaurant", label: "Restaurant", icon: UtensilsCrossed, glow: "from-orange-300/30 to-rose-400/20" },
+  { id: "pub", label: "Nightlife", icon: Martini, glow: "from-amber-300/30 to-rose-400/20" },
+  { id: "cafe", label: "Cafe", icon: Coffee, glow: "from-stone-200/30 to-amber-300/20" },
+  { id: "wellness", label: "Wellness", icon: Waves, glow: "from-emerald-300/30 to-teal-400/20" },
+  { id: "sports", label: "Sports", icon: Volleyball, glow: "from-cyan-300/30 to-sky-400/20" },
+  { id: "shopping", label: "Shopping", icon: ShoppingBag, glow: "from-sky-300/30 to-blue-400/20" },
+  { id: "movies", label: "Movies", icon: Clapperboard, glow: "from-violet-300/30 to-indigo-400/20" },
+  { id: "events", label: "Activities", icon: Sparkles, glow: "from-fuchsia-300/30 to-violet-400/20" },
+];
+
+function getDefaultSubcategories(categoryId: CategoryId) {
+  const firstFilter = getCategoryDefinition(categoryId).filters[0]?.id;
+  return firstFilter ? [firstFilter] : [];
+}
+
+function getCategorySelectionKey(plan: PlanRecord) {
+  return `${plan.category}:${plan.subcategories.join(",")}`;
+}
 
 export function PlanPage({ planId }: { planId: string }) {
   const [plan, setPlan] = useState<PlanRecord | null>(null);
@@ -52,9 +96,17 @@ export function PlanPage({ planId }: { planId: string }) {
   const [decisionPopupOpen, setDecisionPopupOpen] = useState(false);
   const [lastCelebratedDecisionKey, setLastCelebratedDecisionKey] = useState<string | null>(null);
   const [destinationsConfirmOpen, setDestinationsConfirmOpen] = useState(false);
+  const [changeCategoryOpen, setChangeCategoryOpen] = useState(false);
+  const [changeCategorySaving, setChangeCategorySaving] = useState(false);
+  const [categoryRefreshInFlight, setCategoryRefreshInFlight] = useState(false);
+  const [changeCategoryError, setChangeCategoryError] = useState("");
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
   const [notifications, setNotifications] = useState<InAppNotification[]>([]);
   const previousPlanRef = useRef<PlanRecord | null>(null);
+  const [categoryDraft, setCategoryDraft] = useState<CategoryDraft>({
+    category: "restaurant",
+    subcategories: getDefaultSubcategories("restaurant"),
+  });
 
   const inviteLink = `${getBaseUrl()}/join/${planId}`;
   const midpoint = useMemo(() => {
@@ -123,6 +175,14 @@ export function PlanPage({ planId }: { planId: string }) {
 
     return plan.votes.find((vote) => vote.participantId === currentParticipantId) || null;
   }, [currentParticipantId, plan]);
+
+  const isHost = Boolean(
+    plan &&
+      currentParticipantId &&
+      plan.participants[0]?.id === currentParticipantId,
+  );
+
+  const draftCategory = getCategoryDefinition(categoryDraft.category);
 
   const highestVoteCount = useMemo(() => {
     if (!plan || plan.destinations.length === 0) {
@@ -307,6 +367,20 @@ export function PlanPage({ planId }: { planId: string }) {
       }
     }
 
+    if (getCategorySelectionKey(previousPlan) !== getCategorySelectionKey(plan)) {
+      enqueueNotification({
+        kind: "category",
+        title: "Host changed the category",
+      });
+
+      if (
+        previousPlan.destinations.length > 0 &&
+        plan.destinations.length === 0
+      ) {
+        setCategoryRefreshInFlight(true);
+      }
+    }
+
     previousPlanRef.current = plan;
   }, [currentParticipantId, plan]);
 
@@ -328,8 +402,32 @@ export function PlanPage({ planId }: { planId: string }) {
     };
   }, [notifications]);
 
-  async function handleFindDestinations() {
-    if (!plan || plan.participants.length < 2) {
+  useEffect(() => {
+    if (!plan) {
+      return;
+    }
+
+    if (plan.destinations.length > 0) {
+      setCategoryRefreshInFlight(false);
+    }
+
+    if (changeCategoryOpen) {
+      return;
+    }
+
+    setCategoryDraft({
+      category: plan.category,
+      subcategories:
+        plan.subcategories.length > 0
+          ? plan.subcategories
+          : getDefaultSubcategories(plan.category),
+    });
+  }, [changeCategoryOpen, plan]);
+
+  async function handleFindDestinations(planSnapshot?: PlanRecord | null) {
+    const sourcePlan = planSnapshot || plan;
+
+    if (!sourcePlan || sourcePlan.participants.length < 2) {
       return;
     }
 
@@ -352,6 +450,7 @@ export function PlanPage({ planId }: { planId: string }) {
       setPlacesError("Could not find destinations right now.");
     } finally {
       setPlacesLoading(false);
+      setCategoryRefreshInFlight(false);
     }
   }
 
@@ -361,6 +460,71 @@ export function PlanPage({ planId }: { planId: string }) {
     }
 
     setDestinationsConfirmOpen(true);
+  }
+
+  function handleOpenChangeCategory() {
+    if (!plan || !isHost || placesLoading || changeCategorySaving) {
+      return;
+    }
+
+    setCategoryDraft({
+      category: plan.category,
+      subcategories:
+        plan.subcategories.length > 0
+          ? plan.subcategories
+          : getDefaultSubcategories(plan.category),
+    });
+    setChangeCategoryError("");
+    setChangeCategoryOpen(true);
+  }
+
+  async function handleSaveCategoryChange() {
+    if (!plan || !currentParticipantId || !isHost) {
+      setChangeCategoryError("Only the host can change the category.");
+      return;
+    }
+
+    try {
+      setChangeCategorySaving(true);
+      setCategoryRefreshInFlight(true);
+      setChangeCategoryError("");
+      setPlacesError("");
+      setPlacesNotice("");
+      setVoteError("");
+
+      const updateResponse = await fetch(`/api/plans/${planId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          participantId: currentParticipantId,
+          category: categoryDraft.category,
+          subcategories: categoryDraft.subcategories,
+        }),
+      });
+
+      const updatePayload = (await updateResponse.json()) as
+        | { plan?: PlanRecord; error?: string }
+        | undefined;
+
+      if (!updateResponse.ok || !updatePayload?.plan) {
+        setChangeCategoryError(updatePayload?.error || "Could not update the category right now.");
+        return;
+      }
+
+      setPlan(updatePayload.plan);
+      setHasSearched(false);
+      setSortBy("fairness");
+      setDecisionPopupOpen(false);
+      setLastCelebratedDecisionKey(null);
+      setChangeCategoryOpen(false);
+
+      await handleFindDestinations(updatePayload.plan);
+    } catch {
+      setChangeCategoryError("Could not update the category right now.");
+      setCategoryRefreshInFlight(false);
+    } finally {
+      setChangeCategorySaving(false);
+    }
   }
 
   async function handleCopy() {
@@ -557,22 +721,56 @@ export function PlanPage({ planId }: { planId: string }) {
             </div>
           </div>
 
+          {plan.destinations.length > 0 ? (
+            <div className="mt-3 rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm text-white/62">
+                  {isHost
+                    ? "Not the right vibe? You can still change the category and refresh the picks."
+                    : "If these picks miss the mark, you can ask the host to change the category."}
+                </p>
+                {isHost ? (
+                  <button
+                    type="button"
+                    onClick={handleOpenChangeCategory}
+                    disabled={placesLoading || changeCategorySaving || categoryRefreshInFlight}
+                    className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-xs font-semibold text-white transition hover:border-white/20 hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Change category
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
           <button
             onClick={handleOpenDestinationsConfirm}
-            disabled={plan.participants.length < 2 || placesLoading || plan.destinations.length > 0}
+            disabled={
+              plan.participants.length < 2 ||
+              placesLoading ||
+              changeCategorySaving ||
+              categoryRefreshInFlight ||
+              plan.destinations.length > 0
+            }
             className={[
               "mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-sm font-semibold transition",
-              plan.participants.length >= 2 && !placesLoading && plan.destinations.length === 0
+              plan.participants.length >= 2 &&
+              !placesLoading &&
+              !changeCategorySaving &&
+              !categoryRefreshInFlight &&
+              plan.destinations.length === 0
                 ? "bg-amber-300 text-slate-950"
                 : "bg-white/10 text-white/40",
             ].join(" ")}
           >
             <Route className="h-4 w-4" />
-            {placesLoading
-              ? "Finding destinations..."
-              : plan.destinations.length > 0
-                ? "Destinations locked"
-                : "Find best destination"}
+            {changeCategorySaving || categoryRefreshInFlight
+              ? "Changing category..."
+              : placesLoading
+                ? "Finding destinations..."
+                : plan.destinations.length > 0
+                  ? "Destinations locked"
+                  : "Find best destination"}
           </button>
 
           {plan.participants.length < 2 ? (
@@ -665,13 +863,190 @@ export function PlanPage({ planId }: { planId: string }) {
           }}
         />
       ) : null}
+      {changeCategoryOpen ? (
+        <ChangeCategoryModal
+          draft={categoryDraft}
+          selectedCategory={draftCategory}
+          saving={changeCategorySaving}
+          error={changeCategoryError}
+          onClose={() => {
+            if (!changeCategorySaving) {
+              setChangeCategoryOpen(false);
+            }
+          }}
+          onChangeDraft={setCategoryDraft}
+          onConfirm={() => void handleSaveCategoryChange()}
+        />
+      ) : null}
     </main>
+  );
+}
+
+function ChangeCategoryModal({
+  draft,
+  selectedCategory,
+  saving,
+  error,
+  onClose,
+  onChangeDraft,
+  onConfirm,
+}: {
+  draft: CategoryDraft;
+  selectedCategory: ReturnType<typeof getCategoryDefinition>;
+  saving: boolean;
+  error: string;
+  onClose: () => void;
+  onChangeDraft: (nextDraft: CategoryDraft) => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(14,14,18,0.98))] p-5 shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
+        <p className="text-[11px] uppercase tracking-[0.32em] text-amber-100/75">
+          Change category
+        </p>
+        <h3 className="mt-2 text-2xl font-semibold text-white">
+          Try a different vibe
+        </h3>
+        <p className="mt-3 text-sm leading-6 text-white/65">
+          We’ll replace the current destinations, clear existing votes, and fetch a fresh set right away.
+        </p>
+
+        <div className="mt-5">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.26em] text-white/45">
+            Category
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {categoryOptions.map((category) => {
+              const Icon = category.icon;
+              const active = draft.category === category.id;
+
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  onClick={() =>
+                    onChangeDraft({
+                      category: category.id,
+                      subcategories: getDefaultSubcategories(category.id),
+                    })
+                  }
+                  className={[
+                    "relative overflow-hidden rounded-2xl border px-3 py-3 text-left transition",
+                    active
+                      ? "border-amber-200 bg-amber-300/22 text-white shadow-[0_0_0_1px_rgba(253,230,138,0.55),0_18px_40px_rgba(251,191,36,0.16)]"
+                      : "border-white/8 bg-white/[0.03] text-white/70",
+                  ].join(" ")}
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${category.glow} ${active ? "opacity-100" : "opacity-65"}`} />
+                  <div className={`absolute inset-0 ${active ? "ring-1 ring-inset ring-amber-100/50" : ""}`} />
+                  <div className="relative flex items-center gap-2">
+                    <Icon className={active ? "h-4 w-4 text-amber-100" : "h-4 w-4"} />
+                    <span
+                      className={["text-xs font-semibold", active ? "text-white" : ""].join(" ")}
+                      style={{ fontFamily: "var(--font-body), sans-serif" }}
+                    >
+                      {category.label}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {selectedCategory.filters.length > 0 ? (
+          <div className="mt-5">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/45">
+                Filter
+              </p>
+              <p className="text-[11px] text-white/35">Pick up to 3</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {selectedCategory.filters.map((filter) => {
+                const isSelected = draft.subcategories.includes(filter.id);
+
+                return (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
+                        const nextSubcategories = draft.subcategories.filter(
+                          (selectedFilterId) => selectedFilterId !== filter.id,
+                        );
+
+                        onChangeDraft({
+                          ...draft,
+                          subcategories:
+                            nextSubcategories.length > 0
+                              ? nextSubcategories
+                              : getDefaultSubcategories(draft.category),
+                        });
+                        return;
+                      }
+
+                      if (draft.subcategories.length >= 3) {
+                        return;
+                      }
+
+                      onChangeDraft({
+                        ...draft,
+                        subcategories: [...draft.subcategories, filter.id],
+                      });
+                    }}
+                    className={[
+                      "inline-flex items-center justify-center rounded-2xl border px-4 py-1.5 text-xs font-semibold transition",
+                      isSelected
+                        ? "border-amber-200/85 bg-[linear-gradient(135deg,rgba(251,191,36,0.26),rgba(245,158,11,0.12))] text-amber-50 shadow-[0_0_0_1px_rgba(253,230,138,0.35),0_10px_24px_rgba(245,158,11,0.18)]"
+                        : "border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] text-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] hover:border-white/15 hover:bg-white/[0.05] hover:text-white/82",
+                    ].join(" ")}
+                    style={{ borderRadius: "12px", padding: "8px 22px" }}
+                  >
+                    <span
+                      className="text-xs font-semibold"
+                      style={{ fontFamily: "var(--font-body), sans-serif" }}
+                    >
+                      {filter.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+
+        {error ? <p className="mt-4 text-sm text-rose-300">{error}</p> : null}
+
+        <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={saving}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-300 px-4 py-3 text-sm font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {saving ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
+            {saving ? "Refreshing..." : "Refresh picks"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
 function ToastCard({ notification }: { notification: InAppNotification }) {
   const isJoin = notification.kind === "join";
-  const Icon = isJoin ? Users : BellRing;
+  const isCategory = notification.kind === "category";
+  const Icon = isJoin ? Users : isCategory ? Route : BellRing;
 
   return (
     <div
@@ -679,14 +1054,20 @@ function ToastCard({ notification }: { notification: InAppNotification }) {
         "pointer-events-auto overflow-hidden rounded-[1.15rem] border px-4 py-3 shadow-[0_18px_45px_rgba(0,0,0,0.38)] backdrop-blur-xl",
         isJoin
           ? "border-emerald-300/18 bg-[linear-gradient(135deg,rgba(16,185,129,0.18),rgba(15,23,42,0.92))]"
-          : "border-amber-300/18 bg-[linear-gradient(135deg,rgba(251,191,36,0.18),rgba(15,23,42,0.92))]",
+          : isCategory
+            ? "border-sky-300/18 bg-[linear-gradient(135deg,rgba(56,189,248,0.18),rgba(15,23,42,0.92))]"
+            : "border-amber-300/18 bg-[linear-gradient(135deg,rgba(251,191,36,0.18),rgba(15,23,42,0.92))]",
       ].join(" ")}
     >
       <div className="flex items-center gap-3">
         <div
           className={[
             "rounded-full p-2",
-            isJoin ? "bg-emerald-300/14 text-emerald-100" : "bg-amber-300/14 text-amber-100",
+            isJoin
+              ? "bg-emerald-300/14 text-emerald-100"
+              : isCategory
+                ? "bg-sky-300/14 text-sky-100"
+                : "bg-amber-300/14 text-amber-100",
           ].join(" ")}
         >
           <Icon className="h-4 w-4" />

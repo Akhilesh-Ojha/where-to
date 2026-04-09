@@ -474,6 +474,64 @@ export async function savePlanDestinations(planId: string, destinations: Destina
   return getPlan(planId);
 }
 
+export async function updatePlanCategory(
+  planId: string,
+  input: {
+    participantId: string;
+    category: CategoryId;
+    subcategories?: string[];
+  },
+) {
+  const supabase = getSupabaseAdmin();
+  const plan = await getPlan(planId);
+
+  if (!plan) {
+    return null;
+  }
+
+  const hostParticipantId = plan.participants[0]?.id || null;
+
+  if (!hostParticipantId || input.participantId !== hostParticipantId) {
+    throw new Error("Only the host can change the category.");
+  }
+
+  const categoryFilters = input.subcategories?.slice(0, 3) || [];
+  const primaryFilter = categoryFilters[0] || null;
+
+  const { error: updatePlanError } = await supabase
+    .from("plans")
+    .update({
+      category: input.category,
+      subcategory: primaryFilter,
+      subcategories: categoryFilters,
+    })
+    .eq("id", planId);
+
+  if (updatePlanError) {
+    throw new Error(updatePlanError.message);
+  }
+
+  const { error: deleteDestinationsError } = await supabase
+    .from("destinations")
+    .delete()
+    .eq("plan_id", planId);
+
+  if (deleteDestinationsError) {
+    throw new Error(deleteDestinationsError.message);
+  }
+
+  const { error: deleteVotesError } = await supabase
+    .from("destination_votes")
+    .delete()
+    .eq("plan_id", planId);
+
+  if (deleteVotesError) {
+    throw new Error(deleteVotesError.message);
+  }
+
+  return getPlan(planId);
+}
+
 export async function cleanupExpiredPlans() {
   const supabase = getSupabaseAdmin();
   const cutoff = getPlanExpiryCutoffIso();
