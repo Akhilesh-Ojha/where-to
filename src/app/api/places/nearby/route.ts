@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       category: body.category || "restaurant",
       subcategory: body.subcategories?.[0] || body.subcategory || null,
       subcategories: body.subcategories?.slice(0, 3) || (body.subcategory ? [body.subcategory] : []),
-      limit: 10,
+      limit: 8,
     });
 
     const places = results.map((place) => ({

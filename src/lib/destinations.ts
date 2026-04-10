@@ -10,6 +10,8 @@ export type SuggestedPlace = {
   rating: number | null;
   userRatingCount: number | null;
   photoUrls: string[];
+  photoNames?: string[];
+  voters: string[];
 };
 
 export function formatCoords(lat: number, lng: number) {

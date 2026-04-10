@@ -34,10 +34,10 @@ import type { DestinationRecord, PlanRecord } from "@/lib/plans";
 
 function getBaseUrl() {
   if (typeof window !== "undefined") {
-    return window.location.origin;
+    return process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
   }
 
-  return "http://localhost:3000";
+  return process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 }
 
 const SUPPORT_URL = process.env.NEXT_PUBLIC_SUPPORT_URL?.trim() || "";
@@ -107,6 +107,23 @@ export function PlanPage({ planId }: { planId: string }) {
     category: "restaurant",
     subcategories: getDefaultSubcategories("restaurant"),
   });
+
+  function trackEvent(eventName: string, metadata?: Record<string, unknown>) {
+    try {
+      void fetch("/api/analytics/event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventName,
+          planId,
+          participantId: currentParticipantId,
+          metadata: metadata || {},
+        }),
+      });
+    } catch {
+      // best effort
+    }
+  }
 
   const inviteLink = `${getBaseUrl()}/join/${planId}`;
   const midpoint = useMemo(() => {
@@ -297,9 +314,15 @@ export function PlanPage({ planId }: { planId: string }) {
       return;
     }
 
+    if (hasVoteTie) {
+      trackEvent("decision_tie_shown", { decisionKey });
+    } else if (winningDestination) {
+      trackEvent("decision_winner_shown", { decisionKey, placeId: winningDestination.placeId });
+    }
+
     setDecisionPopupOpen(true);
     setLastCelebratedDecisionKey(decisionKey);
-  }, [decisionKey, lastCelebratedDecisionKey]);
+  }, [decisionKey, hasVoteTie, lastCelebratedDecisionKey, winningDestination]);
 
   useEffect(() => {
     if (!plan) {
@@ -674,7 +697,7 @@ export function PlanPage({ planId }: { planId: string }) {
               <p className="text-[11px] uppercase tracking-[0.32em] text-emerald-300/70">Waiting room</p>
               <p className="mt-1 text-sm text-white/55">Live join updates.</p>
             </div>
-            {midpoint ? (
+            {/* {midpoint ? (
               <a
                 href={buildMapUrl(midpoint.lat, midpoint.lng, "Group midpoint")}
                 target="_blank"
@@ -683,7 +706,7 @@ export function PlanPage({ planId }: { planId: string }) {
               >
                 Open midpoint
               </a>
-            ) : null}
+            ) : null} */}
           </div>
 
           <div className="mt-3 grid gap-2">
@@ -852,6 +875,7 @@ export function PlanPage({ planId }: { planId: string }) {
           tiedDestinations={hasVoteTie ? leadingDestinations : []}
           onClose={() => setDecisionPopupOpen(false)}
           viewportSize={viewportSize}
+          onSupportClick={() => trackEvent("support_chai_click", { decisionKey })}
         />
       ) : null}
       {destinationsConfirmOpen ? (
@@ -1138,11 +1162,13 @@ function DecisionModal({
   tiedDestinations,
   onClose,
   viewportSize,
+  onSupportClick,
 }: {
   winner: DestinationRecord | null;
   tiedDestinations: DestinationRecord[];
   onClose: () => void;
   viewportSize: { width: number; height: number };
+  onSupportClick?: () => void;
 }) {
   const hasTie = tiedDestinations.length > 1;
 
@@ -1253,10 +1279,14 @@ function DecisionModal({
           <div
             role="button"
             tabIndex={0}
-            onClick={() => window.open(SUPPORT_URL, "_blank", "noopener,noreferrer")}
+            onClick={() => {
+              onSupportClick?.();
+              window.open(SUPPORT_URL, "_blank", "noopener,noreferrer");
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
+                onSupportClick?.();
                 window.open(SUPPORT_URL, "_blank", "noopener,noreferrer");
               }
             }}
@@ -1269,6 +1299,35 @@ function DecisionModal({
             </div>
           </div>
         ) : null}
+      </div>
+    </div>
+  );
+}
+
+function DestinationPhotoCarousel({
+  name,
+  photoUrls,
+}: {
+  name: string;
+  photoUrls: string[];
+}) {
+  const photoUrl = photoUrls[0];
+
+  if (!photoUrl) {
+    return null;
+  }
+
+  return (
+    <div className="-mx-1 mb-4">
+      <div className="relative h-44 overflow-hidden rounded-2xl border border-white/8 bg-white/[0.03]">
+        <img
+          src={photoUrl}
+          alt={`${name} photo`}
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover"
+        />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent" />
       </div>
     </div>
   );
@@ -1300,25 +1359,10 @@ function DestinationCard({
           : "border-white/8 bg-white/[0.03]",
       ].join(" ")}
     >
-      {place.photoUrls.length > 0 ? (
-        <div className="-mx-1 mb-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {place.photoUrls.map((photoUrl, photoIndex) => (
-            <div
-              key={`${place.placeId}-photo-${photoIndex}`}
-              className="relative h-44 min-w-[88%] snap-center overflow-hidden rounded-2xl border border-white/8 bg-white/[0.03]"
-            >
-              <img
-                src={photoUrl}
-                alt={`${place.name} photo ${photoIndex + 1}`}
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full object-cover"
-              />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/55 to-transparent" />
-            </div>
-          ))}
-        </div>
-      ) : null}
+      <DestinationPhotoCarousel
+        name={place.name}
+        photoUrls={place.photoUrls}
+      />
 
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -1344,6 +1388,11 @@ function DestinationCard({
           >
             {place.address}
           </a>
+          {place.voters.length > 0 ? (
+            <div className="mt-1 text-xs text-white/55">
+              Voted by {place.voters.length === 1 ? place.voters[0] : place.voters.length === 2 ? place.voters.join(", ") : `${place.voters.slice(0, 2).join(", ")} +${place.voters.length - 2} more`}
+            </div>
+          ) : null}
           <div className="mt-2 flex flex-wrap items-center gap-2">
             {place.rating ? (
               <div className="inline-flex items-center gap-2 rounded-full border border-amber-300/15 bg-amber-300/8 px-3 py-1 text-xs text-amber-100/90">

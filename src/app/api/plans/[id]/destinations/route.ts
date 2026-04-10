@@ -16,6 +16,7 @@ import { consumeShortWindowRateLimit, getRequestIpAddress } from "@/lib/rate-lim
 const LOCAL_MEETUP_MAX_DISTANCE_KM = 80;
 const LOCAL_CLUSTER_RADIUS_KM = 40;
 const DEFAULT_RAW_LIMIT = 30;
+const DEFAULT_FINAL_DESTINATION_LIMIT = 8;
 
 export async function POST(
   request: NextRequest,
@@ -95,9 +96,11 @@ export async function POST(
       rating: place.rating,
       userRatingCount: place.userRatingCount,
       photoUrls: place.photoUrls,
+      photoNames: place.photoNames,
+      voters: [],
     }));
 
-    const rankedDestinations = rankPlaces(places, activeParticipants);
+    const rankedDestinations = rankPlaces(places, activeParticipants).slice(0, DEFAULT_FINAL_DESTINATION_LIMIT);
     const rankedSuggestions = rankedDestinations
       .map((destination) => {
         return results.find((result) => result.placeId === destination.placeId) || null;
@@ -107,10 +110,19 @@ export async function POST(
     const hydratedPhotoUrls = new Map(
       hydratedSuggestions.map((suggestion) => [suggestion.placeId, suggestion.photoUrls]),
     );
-    const destinations = rankedDestinations.map((destination) => ({
-      ...destination,
-      photoUrls: hydratedPhotoUrls.get(destination.placeId) || [],
-    }));
+    const participantNames = new Map(plan.participants.map((p) => [p.id, p.name]));
+    const destinations = rankedDestinations.map((destination) => {
+      const voters = plan.votes
+        .filter((vote) => vote.destinationPlaceId === destination.placeId)
+        .map((vote) => participantNames.get(vote.participantId) || "Unknown")
+        .sort();
+      return {
+        ...destination,
+        photoUrls: hydratedPhotoUrls.get(destination.placeId) || [],
+        photoNames: results.find((result) => result.placeId === destination.placeId)?.photoNames || [],
+        voters,
+      };
+    });
     const updatedPlan = await savePlanDestinations(id, destinations);
 
     const message =
@@ -118,7 +130,7 @@ export async function POST(
         ? `${excluded.length} participant${excluded.length > 1 ? "s are" : " is"} much farther than the main group, so results are optimized for the local cluster.`
         : undefined;
 
-    return NextResponse.json({ plan: updatedPlan, destinations, message });
+    return NextResponse.json({ plan: { ...updatedPlan, destinations }, destinations, message });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to fetch nearby destinations.";

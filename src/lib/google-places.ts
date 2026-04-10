@@ -41,8 +41,9 @@ export type GoogleSuggestion = {
   photoNames: string[];
 };
 
-const DEFAULT_AUTOCOMPLETE_DAILY_LIMIT = 300;
-const DEFAULT_NEARBY_DAILY_LIMIT = 150;
+const DEFAULT_AUTOCOMPLETE_DAILY_LIMIT = 1000;
+const DEFAULT_NEARBY_DAILY_LIMIT = 1000;
+const DEFAULT_PHOTOS_DAILY_LIMIT = 200;
 const DEFAULT_NEARBY_SEARCH_RADIUS_METERS = 7000;
 const BROAD_LOCATION_TYPES = new Set([
   "locality",
@@ -108,7 +109,7 @@ function mapGooglePlace(place: GooglePlace): GoogleSuggestion | null {
     photoNames: (place.photos || [])
       .map((photo) => photo.name)
       .filter((value): value is string => Boolean(value))
-      .slice(0, 5),
+      .slice(0, 2),
   };
 }
 
@@ -170,7 +171,12 @@ function dedupeSuggestions(suggestions: GoogleSuggestion[], limit: number) {
   return unique;
 }
 
-async function fetchPhotoUri(photoName: string, maxWidthPx = 800) {
+export async function fetchPhotoUri(photoName: string, maxWidthPx = 800) {
+  await consumeDailyQuota(
+    "google_places_photos",
+    getDailyLimit("GOOGLE_PLACES_PHOTOS_DAILY_LIMIT", DEFAULT_PHOTOS_DAILY_LIMIT),
+  );
+
   const response = await fetch(
     `https://places.googleapis.com/v1/${photoName}/media?maxWidthPx=${maxWidthPx}&skipHttpRedirect=true`,
     {
@@ -197,7 +203,7 @@ export async function hydrateSuggestionPhotos(suggestions: GoogleSuggestion[]) {
       }
 
       const photoUrls = (
-        await Promise.all(suggestion.photoNames.map((photoName) => fetchPhotoUri(photoName)))
+        await Promise.all(suggestion.photoNames.slice(0, 1).map((photoName) => fetchPhotoUri(photoName)))
       ).filter((value): value is string => Boolean(value));
 
       return {

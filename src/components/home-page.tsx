@@ -550,7 +550,18 @@ export function HomePage() {
             Built by Akhil for indecisive groups.
           </p>
         </form>
-      </div>
+        <div className="mt-6 text-center">
+          <p className="text-xs text-white/40">
+            For suggestions or to report a bug, please{" "}
+            <a
+              href="mailto:meetfairsupport@gmail.com"
+              className="text-amber-300 underline decoration-amber-300/50 underline-offset-2 hover:text-amber-200"
+            >
+              contact us here
+            </a>
+            .
+          </p>
+        </div>      </div>
     </main>
   );
 }

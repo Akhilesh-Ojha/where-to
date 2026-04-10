@@ -46,9 +46,8 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
     defaultSearchText: "pub",
     filters: [
       { id: "pub", label: "Pub", searchText: "pub" },
-      { id: "bar", label: "Bar", searchText: "bar" },
       { id: "brewery", label: "Brewery", searchText: "brewery" },
-      { id: "bar_and_grill", label: "Bar & Grill", searchText: "bar and grill" },
+      { id: "live_music", label: "Live Music", searchText: "live music venue" },
     ],
   },
   {
@@ -86,6 +85,7 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
       { id: "cricket", label: "Cricket", searchText: "cricket turf" },
       { id: "basketball", label: "Basketball", searchText: "basketball court" },
       { id: "tennis", label: "Tennis", searchText: "tennis court" },
+       { id: "paddle", label: "Paddle", searchText: "paddle court" },
     ],
   },
   {
@@ -97,7 +97,6 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
       { id: "mall", label: "Mall", searchText: "shopping mall" },
       { id: "market", label: "Market", searchText: "market" },
       { id: "supermarket", label: "Supermarket", searchText: "supermarket" },
-      { id: "department_store", label: "Department Store", searchText: "department store" },
     ],
   },
   {
@@ -120,9 +119,7 @@ export const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
     filters: [
       { id: "cooking_classes", label: "Cooking Classes", searchText: "cooking classes" },
       { id: "workshops", label: "Workshops", searchText: "creative workshops" },
-      { id: "live_music", label: "Live Music", searchText: "live music venue" },
       { id: "art_classes", label: "Art Classes", searchText: "art classes" },
-      { id: "event_venue", label: "Event Spots", searchText: "event venue" },
     ],
   },
 ];

@@ -45,10 +45,12 @@ export type DestinationRecord = {
   rating: number | null;
   userRatingCount: number | null;
   photoUrls: string[];
+  photoNames?: string[];
   fairness: number;
   averageDistanceKm: number;
   distances: DestinationDistance[];
   voteCount: number;
+  voters: string[];
 };
 
 export type VoteRecord = {
@@ -191,6 +193,7 @@ function mapPlanRecord(
     counts[vote.destination_place_id] = (counts[vote.destination_place_id] || 0) + 1;
     return counts;
   }, {});
+  const participantNames = new Map(participants.map((p) => [p.id, p.name]));
 
   return {
     id: plan.id,
@@ -212,21 +215,28 @@ function mapPlanRecord(
       joinedAt: participant.joined_at,
       location: participant.location,
     })),
-    destinations: destinations.map((destination) => ({
-      placeId: destination.place_id,
-      name: destination.name,
-      address: destination.address,
-      type: destination.type,
-      lat: destination.lat,
-      lng: destination.lng,
-      rating: destination.rating,
-      userRatingCount: destination.user_rating_count,
-      photoUrls: destination.photo_urls || [],
-      fairness: destination.fairness,
-      averageDistanceKm: destination.average_distance_km,
-      distances: destination.distances,
-      voteCount: voteCounts[destination.place_id] || 0,
-    })),
+    destinations: destinations.map((destination) => {
+      const voters = votes
+        .filter((vote) => vote.destination_place_id === destination.place_id)
+        .map((vote) => participantNames.get(vote.participant_id) || "Unknown")
+        .sort();
+      return {
+        placeId: destination.place_id,
+        name: destination.name,
+        address: destination.address,
+        type: destination.type,
+        lat: destination.lat,
+        lng: destination.lng,
+        rating: destination.rating,
+        userRatingCount: destination.user_rating_count,
+        photoUrls: destination.photo_urls || [],
+        fairness: destination.fairness,
+        averageDistanceKm: destination.average_distance_km,
+        distances: destination.distances,
+        voteCount: voteCounts[destination.place_id] || 0,
+        voters,
+      };
+    }),
     votes: votes.map((vote) => ({
       participantId: vote.participant_id,
       destinationPlaceId: vote.destination_place_id,
